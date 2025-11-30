@@ -1,42 +1,46 @@
-export function getEpisode(episode){
+export function getEpisode(episode) {
   const {
-      id,
-      url,
-      name,
-      season,
-      number,
-      airdate,
-      airtime,
-      airstamp,
-      runtime,
-      image:{medium},
-      summary,
-      _links:{self:{href}},
-    } = episode;
+    id,
+    url,
+    name,
+    season,
+    number,
+    airdate,
+    airtime,
+    airstamp,
+    runtime,
+    image: { medium },
+    summary,
+    _links: {
+      self: { href },
+    },
+  } = episode;
 
-    // Define.
-    const section = document.createElement("section");
-    const banner = document.createElement("div");
-    const figure = document.createElement("figure");
-    const img = document.createElement("img");
-    const body = document.createElement("div");
+  // Define.
+  const section = document.createElement("section");
+  const banner = document.createElement("div");
+  const figure = document.createElement("figure");
+  const img = document.createElement("img");
+  const body = document.createElement("div");
 
-    // Set attributes.
-    section.classList.add("episode");
-    banner.classList.add("episode-banner");
-    figure.classList.add("episode-figure");
-    body.classList.add("episode-body");
-    section.dataset.id = id;
-    section.setAttribute("aria-label", name );
+  // Set attributes.
+  section.classList.add("episode");
+  banner.classList.add("episode-banner");
+  figure.classList.add("episode-figure");
+  body.classList.add("episode-body");
+  section.dataset.id = id;
+  section.setAttribute("aria-label", name);
 
-    // Populate with values.
-    img.src = medium;
-    img.alt = name;
-    img.setAttribute("width", 250);
-    img.setAttribute("height", 140);
-    const episodeId = `S${("" + season).padStart(2,"0")}E${("" + number).padStart(2,"0")}`;
-    banner.innerHTML = `<p>${episodeId}</p>`
-    body.innerHTML = `<h2>${name}</h2>
+  // Populate with values.
+  img.src = medium;
+  img.alt = name;
+  img.setAttribute("width", 250);
+  img.setAttribute("height", 140);
+  const episodeId = `S${("" + season).padStart(2, "0")}E${(
+    "" + number
+  ).padStart(2, "0")}`;
+  banner.innerHTML = `<p>${episodeId}</p>`;
+  body.innerHTML = `<h2>${name}</h2>
     <p>${summary}</p>
     <p class="episode-link">
     <a href=${url} alt=${episodeId} target="_blank"><span>Watch on Maze</span><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon-size">
@@ -44,12 +48,80 @@ export function getEpisode(episode){
 </svg>
 </a>
     </p>`;
-    
-    // Appends.
-    figure.appendChild(img);
-    section.appendChild(banner);
-    section.appendChild(figure);
-    section.appendChild(body);
 
-    return section;
+  // Appends.
+  figure.appendChild(img);
+  section.appendChild(banner);
+  section.appendChild(figure);
+  section.appendChild(body);
+
+  return section;
+}
+
+export function searchEpisodes() {
+  const searchInput = document.getElementById("search-input");
+  const rootElem = document.getElementById("root");
+  const container = rootElem.querySelector(".episodes-wrapper");
+  const episodeCount = document.getElementById("search-count");
+
+  searchInput.addEventListener("input", function () {
+    const searchTerm = searchInput.value.toLowerCase();
+    const allEpisodes = getAllEpisodes();
+    container.innerHTML = "";
+
+    const filteredEpisodes = allEpisodes.filter((episode) => {
+      const nameMatch = episode.name.toLowerCase().includes(searchTerm);
+      const summaryMatch = episode.summary
+        ? episode.summary.toLowerCase().includes(searchTerm)
+        : false;
+      return nameMatch || summaryMatch;
+    });
+
+    for (let episode of filteredEpisodes) {
+      container.append(getEpisode(episode));
+    }
+
+    episodeCount.textContent = `Displaying ${filteredEpisodes.length} episode(s)`;
+  });
+
+  // Trigger input event to display all episodes on page load
+  searchInput.dispatchEvent(new Event("input"));
+}
+
+export function populateEpisodeSelect() {
+  const selectInput = document.getElementById("episode-select");
+  const rootElem = document.getElementById("root");
+  const container = rootElem.querySelector(".episodes-wrapper");
+  const episodeCount = document.getElementById("search-count");
+
+  const allEpisodes = getAllEpisodes();
+  for (let episode of allEpisodes) {
+    const option = document.createElement("option");
+    const episodeId = `S${("" + episode.season).padStart(2, "0")}E${(
+      "" + episode.number
+    ).padStart(2, "0")}`;
+    option.value = episode.id;
+    option.textContent = `${episodeId} - ${episode.name}`;
+    selectInput.appendChild(option);
+  }
+
+  selectInput.addEventListener("change", function () {
+    const selectedValue = selectInput.value;
+    container.innerHTML = "";
+
+    if (selectedValue === "all-episodes") {
+      for (let episode of allEpisodes) {
+        container.append(getEpisode(episode));
+      }
+      episodeCount.textContent = `Displaying ${allEpisodes.length} episode(s)`;
+    } else {
+      const selectedEpisode = allEpisodes.find(
+        (episode) => episode.id == selectedValue
+      );
+      if (selectedEpisode) {
+        container.append(getEpisode(selectedEpisode));
+        episodeCount.textContent = `Displaying 1 episode(s)`;
+      }
+    }
+  });
 }

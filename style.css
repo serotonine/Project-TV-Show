@@ -22,7 +22,6 @@ body {
   color: var(--color-body);
   background-color: var(--color-bg-body);
   font-family: Helvetica, Arial, sans-serif;
-
 }
 
 body,
@@ -78,7 +77,11 @@ h1.page-title {
   display: block;
 
   &:first-of-type {
-    background: linear-gradient(to top, var(--color-body) 20%, var(--color-blue-dark));
+    background: linear-gradient(
+      to top,
+      var(--color-body) 20%,
+      var(--color-blue-dark)
+    );
     background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -133,9 +136,26 @@ h1.page-title {
 }
 
 .icon-size {
-
   margin-left: 0.25rem;
   width: 1.5rem;
   height: 1.5rem;
   transform: translateY(3px);
+}
+
+.search-container {
+  padding: 2rem 4rem;
+  display: flex;
+}
+
+.search-input {
+  flex-grow: 1;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 2px solid var(--color-body);
+  border-radius: 0.25rem;
+}
+
+.search-count {
+  font-size: 1rem;
+  margin-left: 1rem;
 }

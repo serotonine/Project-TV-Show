@@ -1,8 +1,15 @@
-import { getEpisode } from "./episode.js";
+import {
+  getEpisode,
+  searchEpisodes,
+  populateEpisodeSelect,
+} from "./episode.js";
+
 //You can edit ALL of the code here
 function setup() {
   const allEpisodes = getAllEpisodes();
   makePageForEpisodes(allEpisodes);
+  searchEpisodesPage();
+  populateEpisodeSelect();
 }
 
 function makePageForEpisodes(episodes) {
@@ -14,4 +21,10 @@ function makePageForEpisodes(episodes) {
   }
 }
 
+function searchEpisodesPage() {
+  searchEpisodes();
+}
+function populateSelectEpisodes() {
+  populateEpisodeSelect();
+}
 window.onload = setup;
