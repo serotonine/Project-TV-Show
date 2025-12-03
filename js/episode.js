@@ -1,3 +1,22 @@
+function getDomEl() {
+  return {
+    rootElem: document.getElementById("root"),
+    container: document.querySelector(".episodes-wrapper"),
+    searchContainer: document.getElementById("search-container"),
+    searchInput: document.getElementById("search-input"),
+    selectInput: document.getElementById("episode-select"),
+    episodeCount: document.getElementById("search-count"),
+  };
+}
+
+export async function getAllEpisodes() {
+  const response = await fetch("https://api.tvmaze.com/shows/82/episodes");
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status} – Failed to fetch the episodes.`);
+  }
+  return await response.json();
+}
+
 export function getEpisode(episode) {
   const {
     id,
@@ -58,15 +77,11 @@ export function getEpisode(episode) {
   return section;
 }
 
-export function searchEpisodes() {
-  const searchInput = document.getElementById("search-input");
-  const rootElem = document.getElementById("root");
-  const container = rootElem.querySelector(".episodes-wrapper");
-  const episodeCount = document.getElementById("search-count");
+export function searchEpisodes(allEpisodes) {
+  const { searchContainer, searchInput, container, episodeCount } = getDomEl();
 
   searchInput.addEventListener("input", function () {
     const searchTerm = searchInput.value.toLowerCase();
-    const allEpisodes = getAllEpisodes();
     container.innerHTML = "";
 
     const filteredEpisodes = allEpisodes.filter((episode) => {
@@ -82,19 +97,21 @@ export function searchEpisodes() {
     }
 
     episodeCount.textContent = `Displaying ${filteredEpisodes.length} episode(s)`;
+    // Notice the select.
+    searchInput.dispatchEvent(
+      new CustomEvent("input-search", { bubbles: true })
+    );
   });
-
-  // Trigger input event to display all episodes on page load
-  searchInput.dispatchEvent(new Event("input"));
+  // Listen to input event.
+  searchContainer.addEventListener("select-search", function () {
+    searchInput.value = "";
+  });
 }
 
-export function populateEpisodeSelect() {
-  const selectInput = document.getElementById("episode-select");
-  const rootElem = document.getElementById("root");
-  const container = rootElem.querySelector(".episodes-wrapper");
-  const episodeCount = document.getElementById("search-count");
+export function populateEpisodeSelect(allEpisodes) {
+  const { rootElem, container, searchContainer, selectInput, episodeCount } =
+    getDomEl();
 
-  const allEpisodes = getAllEpisodes();
   for (let episode of allEpisodes) {
     const option = document.createElement("option");
     const episodeId = `S${("" + episode.season).padStart(2, "0")}E${(
@@ -104,6 +121,10 @@ export function populateEpisodeSelect() {
     option.textContent = `${episodeId} - ${episode.name}`;
     selectInput.appendChild(option);
   }
+  // Listen to input event.
+  searchContainer.addEventListener("input-search", function () {
+    selectInput.selectedIndex = 0;
+  });
 
   selectInput.addEventListener("change", function () {
     const selectedValue = selectInput.value;
@@ -123,5 +144,9 @@ export function populateEpisodeSelect() {
         episodeCount.textContent = `Displaying 1 episode(s)`;
       }
     }
+    // Notice the select.
+    selectInput.dispatchEvent(
+      new CustomEvent("select-search", { bubbles: true })
+    );
   });
 }

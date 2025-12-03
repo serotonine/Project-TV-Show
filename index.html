@@ -22,24 +22,19 @@
 
       </header>
       <main class="main">
-        <div id="search-container" class="search-container">
+        <div id="search-container" class="search-container hidden">
           <select id="episode-select" class="episode-select">
             <option value="all-episodes">All Episodes</option>
           </select>
-          &nbsp
           <input type="text" id="search-input" class="search-input" placeholder="Search for an episode..."/> 
-          &nbsp
           <p id="search-count" class="search-count"></p>
         </div>
-        
+        <p class="error"></p>
         <article class="episodes-wrapper">
 
         </article>
       </main>
     </div>
-    <!-- Loads a provided function called getAllEpisodes() which returns all episodes -->
-    <script src="./js/episodes.js"></script>
-
     <!-- Loads YOUR javascript code -->
     <script type="module" src="./js/script.js"></script>
   </body>

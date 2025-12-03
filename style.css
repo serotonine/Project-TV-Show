@@ -97,7 +97,7 @@ h1.page-title {
 .episodes-wrapper {
   padding: 2rem 4rem;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   grid-template-rows: auto;
   gap: 2.5rem;
 }
@@ -145,6 +145,7 @@ h1.page-title {
 .search-container {
   padding: 2rem 4rem;
   display: flex;
+  gap:0.5rem;
 }
 
 .search-input {
@@ -159,3 +160,4 @@ h1.page-title {
   font-size: 1rem;
   margin-left: 1rem;
 }
+.hidden{visibility: hidden;}
