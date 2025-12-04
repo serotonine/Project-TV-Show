@@ -22,11 +22,19 @@
 
       </header>
       <main class="main">
-        <div id="search-container" class="search-container hidden">
-          <select id="episode-select" class="episode-select">
-            <option value="all-episodes">All Episodes</option>
-          </select>
-          <input type="text" id="search-input" class="search-input" placeholder="Search for an episode..."/> 
+        <div id="search-container" class="search-container">
+           <div class="field">
+              <label for="show-select">Select Show:</label>
+              <select id="show-select" class="show-select">
+              </select>
+          </div>
+          <div class="field">
+            <label for="episode-select" class="hidden">Select Episode:</label>
+            <select id="episode-select" class="episode-select hidden">
+              <option value="all-episodes">All Episodes</option>
+            </select>
+          </div>
+          <input type="text" id="search-input" class="search-input hidden" placeholder="Search for an episode..."/> 
           <p id="search-count" class="search-count"></p>
         </div>
         <p class="error"></p>
