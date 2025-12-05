@@ -10,21 +10,23 @@ import {
   searchShows,
 } from "./includes/show.js";
 import { fetchData } from "./includes/httpRequests.js";
-
+// shows or episodes.
 let currentDisplay;
 // Datas.
 let allEpisodes;
 let allShows;
+// DOM.
+const dom = getDomEl();
 
 // Set Up.
 function setup() {
-   const dom = getDomEl();
-  
+   
   fetchData()
     .then((shows) => {
+      currentDisplay = "shows";
+      handleSearchDisplay();
       populateShowSelect(dom.showSelect, shows);
       makePageForShows(dom.container, shows );
-      currentDisplay = "shows";
       allShows = shows;
       // Search-container handle events.
       setListeners(dom);
@@ -38,11 +40,13 @@ function getDomEl() {
   return {
     rootElem: document.getElementById("root"),
     container: document.getElementById("main-wrapper"),
+    searchContainerWrapper:document.getElementById("search-container-wrapper"),
     searchContainer: document.getElementById("search-container"),
     showSelect:document.getElementById("show-select"),
     episodeInput: document.getElementById("search-input"),
     episodeSelect: document.getElementById("episode-select"),
     episodeCount: document.getElementById("search-count"),
+    btnShowCta: document.getElementById("btn-show-cta"),
   };
 }
 // Handle all events.
@@ -58,6 +62,7 @@ function setListeners(dom){
         makePageForEpisodes(dom , allEpisodes);
         populateEpisodeSelect(dom, allEpisodes);
         currentDisplay = "episodes";
+        handleSearchDisplay();
         break;
       case "episode-select":
         console.log("episode-select change detected");
@@ -94,8 +99,27 @@ function setListeners(dom){
         makePageForEpisodes(dom , allEpisodes);
         populateEpisodeSelect(dom, allEpisodes);
         currentDisplay = "episodes";
+        handleSearchDisplay();
   });
 
+}
+function handleSearchDisplay(){
+  // Hide on setUp()
+ const inputLabel = dom.episodeInput.previousElementSibling;
+  //console.log(label);
+  if(currentDisplay === "shows"){
+    dom.searchContainerWrapper.classList.remove("hidden");
+    inputLabel.textContent="Search for a show";
+    dom.episodeSelect.closest(".search-field").classList.toggle("none");
+    dom.btnShowCta.closest(".search-field").classList.toggle("none");
+    
+  }
+  if(currentDisplay === "episodes"){
+    dom.searchContainerWrapper.classList.remove("hidden");
+    inputLabel.textContent="Search for an episode";
+    dom.episodeSelect.closest(".search-field").classList.toggle("none");
+    dom.btnShowCta.closest(".search-field").classList.toggle("none");
+  }
 }
 
 
