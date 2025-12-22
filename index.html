@@ -4,10 +4,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Game of Thrones, the full series listing.">
+    <meta name="description" content="The full series listing.">
     <title>TV Show Project | Serotonine</title>
     <link href="style.css" rel="stylesheet" />
-    <link rel="icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="./favicon.ico" type="image/x-icon" />
   </head>
 
   <body>
@@ -15,7 +15,7 @@
       <header class="header">
         <div class="header-wrapper">
           <h1 class="page-title">
-            <span>All TV shows</span>
+            <span class="page-title-current">All TV shows</span>
             <span><small>Source: <a href="https://tvmaze.com/">TVMaze.com</a></small></span>
           </h1>
           </div.header-wrapper>
@@ -26,23 +26,21 @@
           <div id="search-container" class="search-container">
             <div class="search-field field-show-cta">
               <button type="text" id="btn-show-cta" class="btn btn-show-cta">
-                All Shows List
+                All TV Shows
               </button>
               </div>
-            <div class="search-field field-show-select">
-              <label for="show-select">Select Show:</label>
+            <div class="search-field field-show-select" data>
               <select id="show-select" class="show-select">
+                <option value="null">Select a Show</option>
               </select>
             </div>
             <div class="search-field field-episode-select">
-              <label for="episode-select" class="hidden">Select Episode:</label>
               <select id="episode-select" class="episode-select">
                 <option value="all-episodes">All Episodes</option>
               </select>
             </div>
-            <div class="search-field field-episode-input">
-              <label for="search-input">Search for an episode:</label>
-              <input type="text" id="search-input" class="search-input" placeholder="Search for an episode..." />
+            <div class="search-field field-search-input">
+              <input type="text" id="search-input" class="search-input" placeholder="" />
             </div>
 
           </div>

@@ -1,5 +1,3 @@
-import { fetchData } from "./httpRequests.js";
-
 // Display shows.
 export function makePageForShows(rootElem, allShowsRaw) {
   
@@ -13,10 +11,10 @@ export function makePageForShows(rootElem, allShowsRaw) {
   rootElem.innerHTML = "";
 
   for (let show of allShows) {
-
     // article.
     const article = document.createElement("article");
     article.dataset.id = show.id;
+    article.dataset.title = show.name;
     article.classList.add("show");
     article.setAttribute("tabindex", "0");
 
@@ -56,7 +54,6 @@ export function makePageForShows(rootElem, allShowsRaw) {
         (genres.innerHTML += `<button class="btn show-genre" type="text">${genre}</button>`)
     );
     content.appendChild(genres);
-    //status.
 
     // Start-end.
     const startEnd = document.createElement("p");
@@ -76,12 +73,12 @@ export function makePageForShows(rootElem, allShowsRaw) {
       }
     }
     content.appendChild(rating);
-
     article.appendChild(content);
     rootElem.appendChild(article);
     
   }
 }
+// Select.
 export function populateShowSelect(showSelect, allShowsRaw) {
   const allShows = alphabeticalSort(allShowsRaw);
   for (let show of allShows) {
@@ -91,17 +88,21 @@ export function populateShowSelect(showSelect, allShowsRaw) {
     showSelect.appendChild(option);
   }
   showSelect.addEventListener("change", function (e) {
-    const selectedShowId = e.target.value || 82;
-    // Notice the search container.
+    const selectedShowId = e.target.value || null;
+    const selectedShowTitle = e.target.selectedOptions[0].text;
+    
+    // Notice the Search container.
     const customEvt = new CustomEvent("select-change", {
       bubbles: true,
-      detail: { id: selectedShowId },
+      detail: { 
+      id: selectedShowId,
+      title:selectedShowTitle },
     });
     e.target.dispatchEvent(customEvt);
   });
 }
 export function searchShows(dom, value, allShows){
-  const { searchContainer, episodeInput, container, episodeCount } = dom;
+  const { container, episodeCount } = dom;
     const searchTerm = value.toLowerCase();
     container.innerHTML = "";
     const filteredShows = allShows.filter((show) => {

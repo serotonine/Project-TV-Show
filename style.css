@@ -227,7 +227,7 @@ h1.page-title {
   display: flex;
   gap: 0.5rem;
 }
-.field-episode-input{
+.field-search-input{
   flex-grow: 1;
 }
 .search-container input,

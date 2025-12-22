@@ -7,29 +7,27 @@ export async function getAllEpisodes(showId) {
     console.log("cache response", episodeCache[showId]);
     return episodeCache[showId]; // return cached data
   }
-  try{
+  try {
     const AllEpisodes = await fetchData(showId);
-      episodeCache[showId] = AllEpisodes; // store in cache
-      return AllEpisodes;
-   
-  }
-  catch(error){
+    episodeCache[showId] = AllEpisodes; // store in cache
+    return AllEpisodes;
+  } catch (error) {
     console.log("error");
   }
 }
-
+// Display all episodes.
 export function makePageForEpisodes(dom, episodes) {
-  const {container, episodeInput, episodeSelect} = dom;
+  const { container, searchInput, episodeSelect } = dom;
   container.innerHTML = "";
   // Change grid minmax.
   container.classList.toggle("episodes-wrapper");
   // Remove hidden class from search input and select label.
-  episodeInput.classList.remove("hidden");
-  const episodeSelectLabel = document.querySelector(
+  searchInput.classList.remove("hidden");
+ /*  const episodeSelectLabel = document.querySelector(
     'label[for="episode-select"]'
   );
-  episodeSelectLabel.classList.remove("hidden");
-  episodeSelect.classList.remove("hidden");
+  episodeSelect.classList.remove("hidden"); */
+
   // Populate episode-wrapper with all episodes.
   for (let episode of episodes) {
     container.append(getEpisode(episode));
@@ -37,15 +35,7 @@ export function makePageForEpisodes(dom, episodes) {
 }
 
 function getEpisode(episode) {
-  const {
-    id,
-    url,
-    name,
-    season,
-    number,
-    image,
-    summary,
-  } = episode;
+  const { id, url, name, season, number, image, summary } = episode;
 
   // Define.
   const section = document.createElement("section");
@@ -74,13 +64,14 @@ function getEpisode(episode) {
   body.innerHTML = `<h2>${name}</h2>
     <p>${summary}</p>
     <p class="episode-link">
-    <a href=${url} alt=${episodeId} target="_blank"><span>Watch on Maze</span><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon-size">
+    <a href=${url} alt=${episodeId} target="_blank">
+    <span>Watch on Maze</span>
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon-size">
   <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
 </svg>
-</a>
-    </p>`;
+</a></p>`;
 
-  // Appends.
+  // Append.
   figure.appendChild(img);
   section.appendChild(banner);
   section.appendChild(figure);
@@ -90,8 +81,14 @@ function getEpisode(episode) {
 }
 
 export function populateEpisodeSelect(dom, allEpisodes) {
-  const { container, searchContainer, episodeSelect, episodeInput, episodeCount } = dom;
-  episodeInput.innerHTML = "";
+  const {
+    container,
+    searchContainer,
+    episodeSelect,
+    searchInput,
+    episodeCount,
+  } = dom;
+  searchInput.innerHTML = "";
   for (let episode of allEpisodes) {
     const option = document.createElement("option");
     const episodeId = `S${("" + episode.season).padStart(2, "0")}E${(
@@ -101,14 +98,16 @@ export function populateEpisodeSelect(dom, allEpisodes) {
     option.textContent = `${episodeId} - ${episode.name}`;
     episodeSelect.appendChild(option);
   }
-  // Listen to input event.
+ /*  // Handle Search input event.
   searchContainer.addEventListener("input-search", function () {
-    selectInput.selectedIndex = 0;
-  });
+    episodeSelect.selectedIndex = 0;
+  }); */
 
-  episodeInput.addEventListener("change", function () {
-    const selectedValue = episodeInput.value;
+  // Handle select event.
+  episodeSelect.addEventListener("change", function () {
+    const selectedValue = this.value;
     container.innerHTML = "";
+    searchInput.innerHTML="";
 
     if (selectedValue === "all-episodes") {
       for (let episode of allEpisodes) {
@@ -124,39 +123,26 @@ export function populateEpisodeSelect(dom, allEpisodes) {
         episodeCount.textContent = `Displaying 1 episode(s)`;
       }
     }
-    // Notice the select.
-    episodeInput.dispatchEvent(
-      new CustomEvent("select-search", { bubbles: true })
-    );
   });
 }
 
-  export function searchEpisodes(dom, value, allEpisodes) {
-    const { searchContainer, episodeInput, container, episodeCount } = dom;
-    const searchTerm = value.toLowerCase();
-    container.innerHTML = "";
-    const filteredEpisodes = allEpisodes.filter((episode) => {
-      const nameMatch = episode.name.toLowerCase().includes(searchTerm);
-      const summaryMatch = episode.summary
-        ? episode.summary.toLowerCase().includes(searchTerm)
-        : false;
-      return nameMatch || summaryMatch;
-    });
+export function searchEpisodes(dom, value, allEpisodes) {
+  const {container, episodeCount } = dom;
+  const searchTerm = value.toLowerCase();
+  container.innerHTML = "";
+  const filteredEpisodes = allEpisodes.filter((episode) => {
+    const nameMatch = episode.name.toLowerCase().includes(searchTerm);
+    const summaryMatch = episode.summary
+      ? episode.summary.toLowerCase().includes(searchTerm)
+      : false;
+    return nameMatch || summaryMatch;
+  });
 
-    for (let episode of filteredEpisodes) {
-      container.append(getEpisode(episode));
-    }
-    episodeCount.textContent =
-      filteredEpisodes.length > 0
-        ? `Displaying ${filteredEpisodes.length} episode(s)`
-        : `No result found`;
-    /* // Notice the select.
-    episodeInput.dispatchEvent(
-      new CustomEvent("episode-search", { bubbles: true })
-    );
-  
-  // Listen to input event.
-  searchContainer.addEventListener("select-search", function () {
-    episodeInput.value = "";
-  }); */
+  for (let episode of filteredEpisodes) {
+    container.append(getEpisode(episode));
   }
+  episodeCount.textContent =
+    filteredEpisodes.length > 0
+      ? `Displaying ${filteredEpisodes.length} episode(s)`
+      : `No result found`;
+}
