@@ -1,17 +1,64 @@
-// Display shows.
-export function makePageForShows(rootElem, allShowsRaw) {
-  
+import { getDomEl, isInViewport } from "./dom.js";
+const dom = getDomEl();
+
+// Display Shows.
+export function makePageForShows(allShowsRaw) {
   if (!Array.isArray(allShowsRaw) || !allShowsRaw.length) {
-    throw new Error("Cannot display the shows. Check why.");
+    dom.errorElem.innerHTML = "Cannot display the shows. Check why.";
+    return Promise.resolve();
   }
+  const {container} = dom;
+  
   // Sort alphabetical.
   const allShows = alphabeticalSort(allShowsRaw);
   // Change grid minmax.
-  rootElem.classList.toggle("shows-wrapper");
-  rootElem.innerHTML = "";
-
+  container.classList.toggle("shows-wrapper");
+  // Store all articles.
+  const fragment = document.createDocumentFragment();
+  const visibleImagePromises = [];
+  
   for (let show of allShows) {
-    // article.
+    fragment.appendChild(getShow(show));
+  }
+  container.appendChild(fragment);
+  // Force reflow.
+  void container.offsetHeight;
+  // Find articles in viewport.
+  const articles = container.querySelectorAll(".show");
+
+  articles.forEach(article => {
+    const img = article.querySelector("img");
+    if (!img) return;
+
+    // Cached.
+    if (img.complete && img.naturalHeight !== 0) {
+      return;
+    }
+
+    // Is in viewport ?
+    if (isInViewport(article)) {
+      visibleImagePromises.push(
+        new Promise(resolve => {
+          img.onload = () => {
+            resolve();
+          };
+          img.onerror = () => resolve();
+        })
+      );
+    }
+  });
+
+  // On attend seulement les images des articles visibles à l'écran
+  if (visibleImagePromises.length === 0) {
+    return Promise.resolve(); // Rien à attendre → tout déjà chargé ou pas d'image
+  }
+
+  return Promise.all(visibleImagePromises);
+}
+
+// Create DOM Show.
+function getShow(show){
+  // article.
     const article = document.createElement("article");
     article.dataset.id = show.id;
     article.dataset.title = show.name;
@@ -74,48 +121,46 @@ export function makePageForShows(rootElem, allShowsRaw) {
     }
     content.appendChild(rating);
     article.appendChild(content);
-    rootElem.appendChild(article);
-    
-  }
+    return article;
+}
+// Add class "loaded" to set opacity:1.
+export function displayPageForShows(){
+  const articles = dom.container.querySelectorAll(".show");
+  articles.forEach(article => {
+    article.classList.add("loaded");
+  });
 }
 // Select.
-export function populateShowSelect(showSelect, allShowsRaw) {
+export function populateShowSelect(allShowsRaw) {
   const allShows = alphabeticalSort(allShowsRaw);
   for (let show of allShows) {
     const option = document.createElement("option");
     option.value = show.id;
     option.textContent = show.name;
-    showSelect.appendChild(option);
+    dom.showSelect.appendChild(option);
   }
-  showSelect.addEventListener("change", function (e) {
-    const selectedShowId = e.target.value || null;
-    const selectedShowTitle = e.target.selectedOptions[0].text;
-    
-    // Notice the Search container.
-    const customEvt = new CustomEvent("select-change", {
-      bubbles: true,
-      detail: { 
-      id: selectedShowId,
-      title:selectedShowTitle },
-    });
-    e.target.dispatchEvent(customEvt);
-  });
 }
-export function searchShows(dom, value, allShows){
+export async function searchShows(value, allShows) {
   const { container, episodeCount } = dom;
-    const searchTerm = value.toLowerCase();
-    container.innerHTML = "";
-    const filteredShows = allShows.filter((show) => {
-      const nameMatch = show.name.toLowerCase().includes(searchTerm);
-      const genreMatch = show.genres.some((genre) => genre.toLowerCase() === searchTerm );
-      return nameMatch || genreMatch;
-    });
-    makePageForShows(container, filteredShows);
-
-    episodeCount.textContent =
-      filteredShows.length > 0
-        ? `Displaying ${filteredShows.length} episode(s)`
-        : `No result found`;
+  const searchTerm = value.toLowerCase();
+  container.innerHTML = "";
+  const filteredShows = allShows.filter((show) => {
+    const nameMatch = show.name.toLowerCase().includes(searchTerm);
+    const genreMatch = show.genres.some(
+      (genre) => genre.toLowerCase() === searchTerm
+    );
+    return nameMatch || genreMatch;
+  });
+  let message = "";
+  const lg = filteredShows.length;
+  if (lg > 0) {
+    await makePageForShows(filteredShows);
+    displayPageForShows();
+    message = `Displaying ${lg} Show${lg > 1 ? "s" : ""}.`;
+  } else {
+    message = `No Show found.`;
+  }
+  episodeCount.textContent = message;
 }
 
 // Sort alphabetical case insensitive function.
@@ -124,3 +169,4 @@ function alphabeticalSort(shows) {
     return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
   });
 }
+

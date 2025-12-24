@@ -1,39 +1,78 @@
 import { fetchData } from "./httpRequests.js";
+import { getDomEl, addLoader, removeLoader } from "./dom.js";
 
 const episodeCache = {};
+const dom = getDomEl();
 
 export async function getAllEpisodes(showId) {
   if (episodeCache[showId]) {
-    console.log("cache response", episodeCache[showId]);
-    return episodeCache[showId]; // return cached data
+    // Return cached data.
+    return episodeCache[showId];
   }
   try {
     const AllEpisodes = await fetchData(showId);
-    episodeCache[showId] = AllEpisodes; // store in cache
+    // Store in cache.
+    episodeCache[showId] = AllEpisodes;
     return AllEpisodes;
   } catch (error) {
-    console.log("error");
+    dom.errorElem.innerHTML = error.message;
   }
 }
-// Display all episodes.
-export function makePageForEpisodes(dom, episodes) {
-  const { container, searchInput, episodeSelect } = dom;
-  container.innerHTML = "";
-  // Change grid minmax.
-  container.classList.toggle("episodes-wrapper");
-  // Remove hidden class from search input and select label.
-  searchInput.classList.remove("hidden");
- /*  const episodeSelectLabel = document.querySelector(
-    'label[for="episode-select"]'
-  );
-  episodeSelect.classList.remove("hidden"); */
 
-  // Populate episode-wrapper with all episodes.
+// Display all episodes with proper loading.
+export async function makePageForEpisodes(episodes) {
+  const { container } = dom;
+  /* container.innerHTML = "";
+  addLoader("episodes");  // ← Loader visible */
+
+  const fragment = document.createDocumentFragment();
+  const visibleImagePromises = [];
+
+  // Création de toutes les cartes
   for (let episode of episodes) {
-    container.append(getEpisode(episode));
-  }
-}
+    const section = getEpisode(episode);
+    fragment.appendChild(section);
 
+    // On collecte les promesses seulement pour les images qui ont besoin d'être attendues
+    const img = section.querySelector("img");
+    if (img && !img.complete) {
+      // On vérifie si la carte est dans la viewport (au moins partiellement)
+      // Note : on force le reflow après ajout pour que getBoundingClientRect soit fiable
+      const isVisible = () => {
+        const rect = section.getBoundingClientRect();
+        return rect.top < window.innerHeight && rect.bottom > 0;
+      };
+
+      if (isVisible()) {
+        visibleImagePromises.push(
+          new Promise((resolve) => {
+            img.onload = () => {
+              section.classList.add("loaded");
+              resolve();
+            };
+            img.onerror = () => {
+              section.classList.add("loaded");
+              resolve();
+            };
+          })
+        );
+      } else {
+        img.onload = img.onerror = () => section.classList.add("loaded");
+      }
+    } else if (!img) {
+      section.classList.add("loaded");
+    }
+  }
+  container.appendChild(fragment);
+
+  void container.offsetHeight;
+
+  if (visibleImagePromises.length > 0) {
+    await Promise.all(visibleImagePromises);
+  }
+  removeLoader("episodes");
+}
+// Create DOM episode.
 function getEpisode(episode) {
   const { id, url, name, season, number, image, summary } = episode;
 
@@ -53,10 +92,6 @@ function getEpisode(episode) {
   section.setAttribute("aria-label", name);
 
   // Populate with values.
-  img.src = image?.medium;
-  img.alt = name;
-  img.setAttribute("width", 250);
-  img.setAttribute("height", 140);
   const episodeId = `S${("" + season).padStart(2, "0")}E${(
     "" + number
   ).padStart(2, "0")}`;
@@ -70,24 +105,38 @@ function getEpisode(episode) {
   <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
 </svg>
 </a></p>`;
-
   // Append.
   figure.appendChild(img);
   section.appendChild(banner);
   section.appendChild(figure);
   section.appendChild(body);
+  // Handle Image.
+  if (image?.medium) {
+    img.src = image?.medium;
+    img.alt = name;
+    img.width = 250;
+    img.height = 140;
+
+    img.onload = () => {
+      section.classList.add("loaded");
+    };
+
+    img.onerror = () => {
+      // Avoid blocking.
+      section.classList.add("loaded");
+    };
+
+    figure.appendChild(img);
+  } else {
+    // No image.
+    section.classList.add("loaded");
+  }
 
   return section;
 }
 
-export function populateEpisodeSelect(dom, allEpisodes) {
-  const {
-    container,
-    searchContainer,
-    episodeSelect,
-    searchInput,
-    episodeCount,
-  } = dom;
+export function populateEpisodeSelect(allEpisodes) {
+  const { episodeSelect, searchInput } = dom;
   searchInput.innerHTML = "";
   for (let episode of allEpisodes) {
     const option = document.createElement("option");
@@ -98,36 +147,28 @@ export function populateEpisodeSelect(dom, allEpisodes) {
     option.textContent = `${episodeId} - ${episode.name}`;
     episodeSelect.appendChild(option);
   }
- /*  // Handle Search input event.
-  searchContainer.addEventListener("input-search", function () {
-    episodeSelect.selectedIndex = 0;
-  }); */
-
-  // Handle select event.
-  episodeSelect.addEventListener("change", function () {
-    const selectedValue = this.value;
-    container.innerHTML = "";
-    searchInput.innerHTML="";
-
-    if (selectedValue === "all-episodes") {
-      for (let episode of allEpisodes) {
-        container.append(getEpisode(episode));
-      }
-      episodeCount.textContent = `Displaying ${allEpisodes.length} episode(s)`;
-    } else {
-      const selectedEpisode = allEpisodes.find(
-        (episode) => episode.id == selectedValue
-      );
-      if (selectedEpisode) {
-        container.append(getEpisode(selectedEpisode));
-        episodeCount.textContent = `Displaying 1 episode(s)`;
-      }
-    }
-  });
 }
 
-export function searchEpisodes(dom, value, allEpisodes) {
-  const {container, episodeCount } = dom;
+export function getSelectedEpisode(value, allEpisodes) {
+  const { container, episodeCount } = dom;
+  container.innerHTML = "";
+
+  if (value === "all-episodes") {
+    for (let episode of allEpisodes) {
+      container.append(getEpisode(episode));
+    }
+    episodeCount.textContent = `Displaying ${allEpisodes.length} episodes`;
+  } else {
+    const selectedEpisode = allEpisodes.find((episode) => episode.id == value);
+    if (selectedEpisode) {
+      container.append(getEpisode(selectedEpisode));
+      episodeCount.textContent = "";
+    }
+  }
+}
+
+export function searchEpisodes(value, allEpisodes) {
+  const { container, episodeCount } = dom;
   const searchTerm = value.toLowerCase();
   container.innerHTML = "";
   const filteredEpisodes = allEpisodes.filter((episode) => {
@@ -141,8 +182,7 @@ export function searchEpisodes(dom, value, allEpisodes) {
   for (let episode of filteredEpisodes) {
     container.append(getEpisode(episode));
   }
+  const lg = filteredEpisodes.length;
   episodeCount.textContent =
-    filteredEpisodes.length > 0
-      ? `Displaying ${filteredEpisodes.length} episode(s)`
-      : `No result found`;
+    lg > 0 ? `Displaying ${lg} episode${lg > 1 && "s"}` : `No result found`;
 }
