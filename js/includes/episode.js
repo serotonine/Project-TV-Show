@@ -1,5 +1,5 @@
 import { fetchData } from "./httpRequests.js";
-import { getDomEl, addLoader, removeLoader } from "./dom.js";
+import { getDomEl, removeLoader } from "./dom.js";
 
 const episodeCache = {};
 const dom = getDomEl();

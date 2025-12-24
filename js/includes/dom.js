@@ -7,6 +7,7 @@ export function getDomEl() {
     container: document.getElementById("main-wrapper"),
     searchContainerWrapper: document.getElementById("search-container-wrapper"),
     searchContainer: document.getElementById("search-container"),
+    genresContainer : document.getElementById("genres-container"),
     showSelect: document.getElementById("show-select"),
     episodeSelect: document.getElementById("episode-select"),
     episodeCount: document.getElementById("search-count"),

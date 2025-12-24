@@ -1,4 +1,5 @@
 import { getDomEl, isInViewport } from "./dom.js";
+
 const dom = getDomEl();
 
 // Display Shows.
@@ -48,9 +49,8 @@ export function makePageForShows(allShowsRaw) {
     }
   });
 
-  // On attend seulement les images des articles visibles à l'écran
   if (visibleImagePromises.length === 0) {
-    return Promise.resolve(); // Rien à attendre → tout déjà chargé ou pas d'image
+    return Promise.resolve(); 
   }
 
   return Promise.all(visibleImagePromises);
@@ -129,6 +129,37 @@ export function displayPageForShows(){
   articles.forEach(article => {
     article.classList.add("loaded");
   });
+}
+// Genres.
+export function populateGenres(allShows){
+  const allGenres = new Set();
+  for (let show of allShows) {
+    const {genres} = show;
+    genres.forEach(g=> allGenres.add(g));
+  }
+  allGenres.forEach(g => dom.genresContainer.appendChild(getGenre(g)));
+}
+function getGenre(genre){
+  const btn = document.createElement("button");
+  btn.type = "text";
+  btn.classList.add("btn","btn-genre");
+  btn.dataset.name = genre;
+  btn.textContent = genre;
+  return btn; 
+}
+export async function searchShowsByGenres(allGenreActive, allShows){
+  const actives = Array.from(allGenreActive).map(node=> node.dataset.name);
+  const filteredShows = allShows.filter(show => actives.every(genre => show.genres.includes(genre)) ) ;
+  let message = "";
+  const lg = filteredShows.length;
+  if (lg > 0) {
+    await makePageForShows(filteredShows);
+    displayPageForShows();
+    message = `Displaying ${lg} Show${lg > 1 ? "s" : ""}.`;
+  } else {
+    message = `No Show found.`;
+  }
+  dom.episodeCount.textContent = message;
 }
 // Select.
 export function populateShowSelect(allShowsRaw) {
