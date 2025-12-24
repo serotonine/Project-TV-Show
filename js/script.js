@@ -172,6 +172,7 @@ function handleSearchDisplay() {
     dom.genresContainer.classList.remove("none");
     dom.showSelect.closest(".search-field").classList.remove("none");
     dom.episodeSelect.closest(".search-field").classList.add("none");
+    dom.episodeSelect.selectedIndex = 0;
     dom.btnShowCta.closest(".search-field").classList.toggle("none");
   }
   if (currentDisplay === "episodes") {
