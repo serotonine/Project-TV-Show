@@ -1,5 +1,5 @@
 import { fetchData } from "./httpRequests.js";
-import { getDomEl, removeLoader } from "./dom.js";
+import { getDomEl, removeLoader, getSVGLink } from "./dom.js";
 
 const episodeCache = {};
 const dom = getDomEl();
@@ -16,6 +16,7 @@ export async function getAllEpisodes(showId) {
     return AllEpisodes;
   } catch (error) {
     dom.errorElem.innerHTML = error.message;
+    throw error;
   }
 }
 
@@ -101,9 +102,7 @@ function getEpisode(episode) {
     <p class="episode-link">
     <a href=${url} alt=${episodeId} target="_blank">
     <span>Watch on Maze</span>
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon-size">
-  <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 0 0 3 8.25v10.5A2.25 2.25 0 0 0 5.25 21h10.5A2.25 2.25 0 0 0 18 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-</svg>
+    ${getSVGLink()}
 </a></p>`;
   // Append.
   figure.appendChild(img);
@@ -131,22 +130,40 @@ function getEpisode(episode) {
     // No image.
     section.classList.add("loaded");
   }
-
   return section;
 }
 
+// SELECT.
 export function populateEpisodeSelect(allEpisodes) {
   const { episodeSelect, searchInput } = dom;
+  const episodesBySeason = getEpisodesBySeason(allEpisodes);
   searchInput.innerHTML = "";
-  for (let episode of allEpisodes) {
-    const option = document.createElement("option");
-    const episodeId = `S${("" + episode.season).padStart(2, "0")}E${(
-      "" + episode.number
-    ).padStart(2, "0")}`;
-    option.value = episode.id;
-    option.textContent = `${episodeId} - ${episode.name}`;
-    episodeSelect.appendChild(option);
-  }
+  episodesBySeason.forEach((episodes, season) => {
+    const nbTxt = (nb) => ("" + season).padStart(2, "0");
+    const optGroup = document.createElement("optgroup");
+    optGroup.label = `Season ${nbTxt(season)}`;
+    const optionSeason = document.createElement("option");
+    optionSeason.value = "S" + season;
+    optionSeason.textContent = `SEASON ${nbTxt(season)} ALL EPISODES`;
+    optGroup.appendChild(optionSeason);
+    episodes.forEach((episode) => {
+      const option = document.createElement("option");
+      const episodeId = `S${nbTxt(season)}E${nbTxt(episode.number)}`;
+      option.value = episode.id;
+      option.textContent = `${episodeId} - ${episode.name}`;
+      optGroup.appendChild(option);
+    });
+    episodeSelect.appendChild(optGroup);
+  });
+}
+
+// Group episodes by Season.
+function getEpisodesBySeason(allEpisodes) {
+  const map = new Map();
+  return allEpisodes.reduce((acc, current) => {
+    const currentNumbers = acc.get(current.season) || [];
+    return acc.set(current.season, [...currentNumbers, current]);
+  }, map);
 }
 
 export function getSelectedEpisode(value, allEpisodes) {
@@ -158,7 +175,16 @@ export function getSelectedEpisode(value, allEpisodes) {
       container.append(getEpisode(episode));
     }
     episodeCount.textContent = `Displaying ${allEpisodes.length} episodes`;
-  } else {
+  } 
+  else if (value.charAt(0) === "S"){
+    const seasonId = value.substring(1);
+   const selectedEpisodes = allEpisodes.filter(episode => episode.season == seasonId);
+   selectedEpisodes.forEach(s =>{container.append(getEpisode(s))});
+   episodeCount.textContent = `Displaying ${selectedEpisodes.length} episodes`;
+
+
+  }
+  else {
     const selectedEpisode = allEpisodes.find((episode) => episode.id == value);
     if (selectedEpisode) {
       container.append(getEpisode(selectedEpisode));

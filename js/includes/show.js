@@ -1,6 +1,8 @@
-import { getDomEl, isInViewport } from "./dom.js";
+import { getDomEl, isInViewport, getSVGLink } from "./dom.js";
+import { Favorites } from "./favorites.js";
 
 const dom = getDomEl();
+const {container} = dom;
 
 // Display Shows.
 export function makePageForShows(allShowsRaw) {
@@ -55,6 +57,20 @@ export function makePageForShows(allShowsRaw) {
 
   return Promise.all(visibleImagePromises);
 }
+// Display Sorted Shows.
+export function makePageForSortedShows(sortedShows) {
+  container.innerHTML ="";
+  // Store all articles.
+  const fragment = document.createDocumentFragment();
+  
+  for (let show of sortedShows) {
+    const current = getShow(show);
+    current.classList.add("loaded");
+    fragment.appendChild(current);
+  }
+  container.appendChild(fragment);
+}
+
 
 // Create DOM Show.
 function getShow(show){
@@ -62,12 +78,12 @@ function getShow(show){
     const article = document.createElement("article");
     article.dataset.id = show.id;
     article.dataset.title = show.name;
-    article.classList.add("show");
+    article.className = "show";
     article.setAttribute("tabindex", "0");
 
     // Figure.
     const figure = document.createElement("figure");
-    figure.classList.add("show-image");
+    figure.className = "show-image";
 
     // Image.
     if (show.image && show.image.medium) {
@@ -80,7 +96,7 @@ function getShow(show){
 
     // Content.
     const content = document.createElement("div");
-    content.classList.add("show-body");
+    content.className = "show-body";
 
     // Title.
     const title = document.createElement("h2");
@@ -89,13 +105,13 @@ function getShow(show){
 
     // Summary.
     const summary = document.createElement("div");
-    summary.classList.add("show-summary");
+    summary.className = "show-summary";
     summary.innerHTML = show.summary;
     content.appendChild(summary);
 
     // Genres.
     const genres = document.createElement("div");
-    genres.classList.add("show-genres");
+    genres.className = "show-genres";
     show?.genres.forEach(
       (genre) =>
         (genres.innerHTML += `<button class="btn show-genre" type="text">${genre}</button>`)
@@ -104,22 +120,33 @@ function getShow(show){
 
     // Start-end.
     const startEnd = document.createElement("p");
-    genres.classList.add("show-start-end");
+    genres.className = "show-start-end";
     startEnd.innerHTML = `<small><b>${show.premiered} | ${show.ended}</b></small>`;
     content.appendChild(startEnd);
 
     // rating.
     const rating = document.createElement("p");
-    rating.classList.add("show-rating");
-    const average = Math.round(show.rating.average);
-    for (let i = 1; i <= 10; i++) {
-      if (i <= average) {
-        rating.innerHTML += `<span class="active">*</span>`;
-      } else {
-        rating.innerHTML += `<span>*</span>`;
-      }
+    rating.className = "show-rating";
+    const average = Math.round(show.rating.average || 0);
+    rating.innerHTML = `<span class="active">&#x2605;</span>`.repeat(average) + `<span>&#x2605;</span>`.repeat(10 - average);
+
+    // Link to Official Website.
+    const link = document.createElement("a");
+    link.href = show.officialSite;
+    link.alt = show.name;
+    link.target = "_blank";
+    link.innerHTML = ` <span>Official Site</span>
+    ${getSVGLink()}`
+
+    // Favorite.
+    const favorite = document.createElement("div");
+    favorite.className="heart";
+    if (Favorites.isFavorite(show.id)){
+      favorite.classList.add("active");
     }
     content.appendChild(rating);
+    content.appendChild(link);
+    content.appendChild(favorite);
     article.appendChild(content);
     return article;
 }
@@ -142,7 +169,7 @@ export function populateGenres(allShows){
 function getGenre(genre){
   const btn = document.createElement("button");
   btn.type = "text";
-  btn.classList.add("btn","btn-genre");
+  btn.className = "btn btn-genre";
   btn.dataset.name = genre;
   btn.textContent = genre;
   return btn; 
@@ -193,11 +220,48 @@ export async function searchShows(value, allShows) {
   }
   episodeCount.textContent = message;
 }
+export function sortPageForShows(value, allShowsRaw){
+  let sortedShows;
+  switch(value){
+    case "name":
+      // Sort alphabetical.
+      sortedShows = alphabeticalSort(allShowsRaw);
+      break;
+      case "start":
+      // Sort by start date.
+      sortedShows = startSort(allShowsRaw);
+        break;
+      case "favorites":
+      // Sort by favorites.
+      sortedShows = favoriteSort(allShowsRaw);
+        break;
+  }
+  makePageForSortedShows(sortedShows);
+  return sortedShows.length;
+}
 
 // Sort alphabetical case insensitive function.
 function alphabeticalSort(shows) {
-  return shows.sort((a, b) => {
+return shows.sort((a, b) => {
     return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
   });
 }
+// Sort shows by Premiered.
+function startSort(shows) {
+  return shows.sort((a, b) => {
+    const atm = Date.parse(a.premiered);
+    const btm = Date.parse(b.premiered);
+    if(isNaN(atm) || isNaN(btm)){
+      throw new Error("Show.js : Invalid premiered values.");
+    }
+    return atm - btm;
+  });
+}
+
+// Sort by favorites.
+function favoriteSort(allShowsRaw){
+ const favorites = Favorites.getFavorites();
+ return alphabeticalSort(favorites);
+}
+
 

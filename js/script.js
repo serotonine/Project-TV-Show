@@ -1,9 +1,11 @@
 import { fetchData } from "./includes/httpRequests.js";
+// getDomEl, setLoader, addLoader, removeLoader,backToTop.
 import {
   getDomEl,
   setLoader,
   addLoader,
   removeLoader,
+  backToTop,
 } from "./includes/dom.js";
 import {
   getAllEpisodes,
@@ -19,7 +21,10 @@ import {
   searchShowsByGenres,
   populateShowSelect,
   searchShows,
+  sortPageForShows,
 } from "./includes/show.js";
+
+import { Favorites } from "./includes/favorites.js";
 
 // shows or episodes.
 let currentDisplay;
@@ -35,6 +40,8 @@ function setup() {
   // Loader init.
   setLoader();
   addLoader("Shows");
+  // Back to top;
+  backToTop();
   fetchData()
     .then(async (shows) => {
       // Store the whole shows.
@@ -96,7 +103,6 @@ function setListeners(dom) {
         currentDisplay = "episodes";
         // Display the current Show.
         setTitle(selectedShowTitle);
-        // removeLoader();
         await makePageForEpisodes(allEpisodes);
         populateEpisodeSelect(allEpisodes);
         handleSearchDisplay();
@@ -104,6 +110,11 @@ function setListeners(dom) {
         // Empty search input.
         dom.searchInput.value = "";
         getSelectedEpisode(e.target.value || null, allEpisodes);
+      } else if (e.target.id === "display-select") {
+        const count = sortPageForShows(e.target.value, allShows);
+        dom.episodeCount.innerHTML = `Display ${count} show${
+          count > 1 ? "s" : ""
+        }.`;
       } else {
         return;
       }
@@ -143,7 +154,6 @@ function setListeners(dom) {
   // Handle episodes display on show item click.
   container.addEventListener("click", async function (e) {
     const show = e.target.closest(".show");
-
     if (!show) {
       return;
     }
@@ -151,28 +161,36 @@ function setListeners(dom) {
     if (!id || !title) {
       return;
     }
-    currentDisplay = "episodes";
-    allEpisodes = await getAllEpisodes(id);
-    dom.container.innerHTML = "";
-    await makePageForEpisodes(allEpisodes);
-    populateEpisodeSelect(allEpisodes);
-    setTitle(title);
-    handleSearchDisplay();
+    if (e.target.classList.contains("heart")) {
+      Favorites.handleFavorites(id, allShows);
+      e.target.classList.toggle("active");
+    } else {
+      currentDisplay = "episodes";
+      allEpisodes = await getAllEpisodes(id);
+      dom.container.innerHTML = "";
+      await makePageForEpisodes(allEpisodes);
+      populateEpisodeSelect(allEpisodes);
+      setTitle(title);
+      handleSearchDisplay();
+    }
   });
 }
 // Handle inputs display.
 function handleSearchDisplay() {
   dom.searchInput.value = "";
   dom.episodeCount.textContent = "";
+  // Reset all selects.
+  dom.searchContainer
+    .querySelectorAll("select")
+    .forEach((s) => (s.selectedIndex = 0));
   if (currentDisplay === "shows") {
-    dom.showSelect.selectedIndex = 0;
     setTitle("All TV shows");
-    dom.searchContainerWrapper.classList.remove("hidden");
     dom.searchInput.placeholder = "Search for a show";
     dom.genresContainer.classList.remove("none");
+    dom.searchContainerWrapper.classList.remove("hidden");
     dom.showSelect.closest(".search-field").classList.remove("none");
     dom.episodeSelect.closest(".search-field").classList.add("none");
-    dom.episodeSelect.selectedIndex = 0;
+    dom.displaySelect.closest(".search-field").classList.remove("none");
     dom.btnShowCta.closest(".search-field").classList.toggle("none");
   }
   if (currentDisplay === "episodes") {
@@ -182,10 +200,16 @@ function handleSearchDisplay() {
       g.classList.remove("active")
     );
     dom.genresContainer.classList.toggle("none");
-    dom.showSelect.closest(".search-field").classList.toggle("none");
-    dom.episodeSelect.closest(".search-field").classList.toggle("none");
-    dom.btnShowCta.closest(".search-field").classList.toggle("none");
+    const { showSelect, episodeSelect, btnShowCta, displaySelect } = dom;
+    toggleNone(showSelect, episodeSelect, btnShowCta, displaySelect);
   }
+}
+
+// Handle inputs display helper.
+function toggleNone(...elements) {
+  elements.forEach((el) =>
+    el.closest(".search-field").classList.toggle("none")
+  );
 }
 
 // Handle Title text content.
