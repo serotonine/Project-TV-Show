@@ -1,4 +1,4 @@
-export class Favorites {
+export default class Favorites {
   constructor() {}
   // Get localStorage.
   static getFavorites() {

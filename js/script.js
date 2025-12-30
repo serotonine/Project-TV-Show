@@ -1,30 +1,12 @@
 import { fetchData } from "./includes/httpRequests.js";
-// getDomEl, setLoader, addLoader, removeLoader,backToTop.
-import {
-  getDomEl,
-  setLoader,
-  addLoader,
-  removeLoader,
-  backToTop,
-} from "./includes/dom.js";
-import {
-  getAllEpisodes,
-  searchEpisodes,
-  getSelectedEpisode,
-  populateEpisodeSelect,
-  makePageForEpisodes,
-} from "./includes/episode.js";
-import {
-  makePageForShows,
-  displayPageForShows,
-  populateGenres,
-  searchShowsByGenres,
-  populateShowSelect,
-  searchShows,
-  sortPageForShows,
-} from "./includes/show.js";
-
-import { Favorites } from "./includes/favorites.js";
+// All about the DOM.
+import Dom from "./classes/Dom.js";
+// All about the Shows.
+import Show from "./classes/show/Show.js";
+// All about the favorites Shows.
+import Favorites from "./classes/Favorites.js";
+// All about the episodes.
+import Episode from "./classes/episode/Episode.js";
 
 // shows or episodes.
 let currentDisplay;
@@ -33,101 +15,110 @@ let allEpisodes;
 let allShows;
 // DOM.
 let dom;
+// Shows.
+let shows;
+// Episodes.
+let episodes;
 
 // Set Up.
 function setup() {
-  dom = getDomEl();
+
+  // Classes instantiation.
+  dom = new Dom();
+  episodes = new Episode(dom);
   // Loader init.
-  setLoader();
-  addLoader("Shows");
+  dom.addLoader("Shows");
   // Back to top;
-  backToTop();
+  dom.backToTop();
+
+  // Let's partying ! 
   fetchData()
-    .then(async (shows) => {
+    .then(async (response) => {
       // Store the whole shows.
-      allShows = shows;
+      allShows = response;
       // Useful for Search Inputs.
       currentDisplay = "shows";
-      // Wait images loaded.
-      await makePageForShows(allShows);
-      displayPageForShows();
-      populateShowSelect(allShows);
-      populateGenres(allShows);
-
+      // Classes instantiation.
+      shows = new Show(dom, allShows);
+      /* 
+       * Wait images loaded.
+       * All shows displayed
+       * Select and genres displayed.
+      */
+     // Usefull when back to shows.
+      allShows = await shows.init();
       handleSearchDisplay();
-      removeLoader();
-      dom.episodeCount.textContent = `Display ${allShows.length} Shows`;
+      dom.removeLoader();
+      dom.setCount(`Display ${allShows.length} Shows`);
       // Search-container handle events.
       setListeners(dom);
     })
     .catch((error) => {
-      dom.errorElem.innerHTML = "Error: " + error.message;
+      dom.setError("Error: " + error.stack);
     });
 }
 
 // Handle all events.
 function setListeners(dom) {
-  const { searchContainer, genresContainer, container } = dom;
+  const { searchContainer, genresContainer, container } = dom.elements;
 
   // Handle Search input.
   searchContainer.addEventListener("input", async function (e) {
     const target = e.target;
     const tag = e.target.tagName;
+    dom.resetGenres();
     if (tag === "INPUT") {
+      dom.resetSelect(currentDisplay);
       if (currentDisplay === "episodes" && allEpisodes) {
-        dom.episodeSelect.selectedIndex = 0;
         if (target.value) {
-          searchEpisodes(target.value, allEpisodes);
+          episodes.searchEpisodes(target.value, allEpisodes);
         }
       }
       if (currentDisplay === "shows" && allShows) {
-        dom.showSelect.selectedIndex = 0;
         let isEmpty = true;
         if (target.value.length >= 1) {
           isEmpty = false;
-          searchShows(target.value, allShows);
+          shows.searchShows(target.value, allShows);
         }
         if (isEmpty) {
-          makePageForShows(allShows);
+          shows.makePageForShows(allShows);
         }
       }
     }
     if (tag === "SELECT") {
+
+      dom.resetContainer();
+      dom.resetSearchInput();
+
       if (e.target.id === "show-select") {
-        container.innerHTML = "";
-        addLoader("episodes");
+        currentDisplay = "episodes";
         const selectedShowId = e.target.value || null;
         const selectedShowTitle = e.target.selectedOptions[0].text;
-        // Fetch episodes or retrieve from storage.
-        allEpisodes = await getAllEpisodes(selectedShowId);
-        currentDisplay = "episodes";
-        // Display the current Show.
-        setTitle(selectedShowTitle);
-        await makePageForEpisodes(allEpisodes);
-        populateEpisodeSelect(allEpisodes);
+        await episodes.init(selectedShowId, selectedShowTitle);
         handleSearchDisplay();
-      } else if (e.target.id === "episode-select") {
-        // Empty search input.
-        dom.searchInput.value = "";
-        getSelectedEpisode(e.target.value || null, allEpisodes);
-      } else if (e.target.id === "display-select") {
-        const count = sortPageForShows(e.target.value, allShows);
-        dom.episodeCount.innerHTML = `Display ${count} show${
+      }
+      else if (e.target.id === "episode-select") {
+        episodes.getSelectedEpisode(e.target.value || null, allEpisodes);
+      }
+      else if (e.target.id === "display-select") {
+        const count = await shows.sortPageForShows(e.target.value, allShows);
+        dom.setCount(`Display ${count} show${
           count > 1 ? "s" : ""
-        }.`;
+        }.`);
       } else {
         return;
       }
     }
   });
-  // Handle genres select.
+
+  // Handle genres buttons event.
   genresContainer.addEventListener("click", async function (e) {
     e.target.classList.toggle("active");
+    dom.resetContainer();
+    dom.addLoader("shows");
     const actives = document.querySelectorAll(".btn-genre.active");
-    dom.container.innerHTML = "";
-    addLoader("shows");
-    await searchShowsByGenres(actives, allShows);
-    removeLoader();
+    await shows.searchShowsByGenres(actives, allShows);
+    dom.removeLoader();
   });
 
   // Empty Search-input on focus.
@@ -136,6 +127,7 @@ function setListeners(dom) {
       e.target.value = "";
     }
   });
+
   // Handle "All TV Show" Button Event.
   searchContainer.addEventListener("click", async function (e) {
     if (e.target.id != "btn-show-cta") {
@@ -143,11 +135,11 @@ function setListeners(dom) {
     }
     currentDisplay = "shows";
     // Empty container.
-    dom.container.innerHTML = "";
-    addLoader(currentDisplay);
-    await makePageForShows(allShows);
-    removeLoader();
-    displayPageForShows();
+    dom.resetContainer();
+    dom.addLoader(currentDisplay);
+    await shows.makePageForShows(allShows);
+    shows.displayPageForShows();
+    dom.removeLoader();
     handleSearchDisplay();
   });
 
@@ -161,60 +153,51 @@ function setListeners(dom) {
     if (!id || !title) {
       return;
     }
+    dom.resetContainer();
+    dom.resetSearchInput();
+
     if (e.target.classList.contains("heart")) {
       Favorites.handleFavorites(id, allShows);
       e.target.classList.toggle("active");
     } else {
       currentDisplay = "episodes";
-      allEpisodes = await getAllEpisodes(id);
-      dom.container.innerHTML = "";
-      await makePageForEpisodes(allEpisodes);
-      populateEpisodeSelect(allEpisodes);
-      setTitle(title);
+      await episodes.init(id, title);
       handleSearchDisplay();
     }
   });
 }
 // Handle inputs display.
 function handleSearchDisplay() {
-  dom.searchInput.value = "";
-  dom.episodeCount.textContent = "";
-  // Reset all selects.
-  dom.searchContainer
-    .querySelectorAll("select")
-    .forEach((s) => (s.selectedIndex = 0));
+   
+  dom.resetSearchInput();
+  dom.resetCount();
+  dom.resetSelect();
+  const { 
+    searchContainerWrapper,
+    showSelect,
+    episodeSelect,
+    btnShowCta,
+    displaySelect,
+    searchInput,
+    genresContainer } = dom.elements;
+
   if (currentDisplay === "shows") {
-    setTitle("All TV shows");
-    dom.searchInput.placeholder = "Search for a show";
-    dom.genresContainer.classList.remove("none");
-    dom.searchContainerWrapper.classList.remove("hidden");
-    dom.showSelect.closest(".search-field").classList.remove("none");
-    dom.episodeSelect.closest(".search-field").classList.add("none");
-    dom.displaySelect.closest(".search-field").classList.remove("none");
-    dom.btnShowCta.closest(".search-field").classList.toggle("none");
+    dom.setTitle("All TV shows");
+    dom.toggleNone(btnShowCta);
+    searchInput.placeholder = "Search for a show";
+    genresContainer.classList.remove("none");
+    searchContainerWrapper.classList.remove("hidden");
+    showSelect.closest(".search-field").classList.remove("none");
+    episodeSelect.closest(".search-field").classList.add("none");
+    displaySelect.closest(".search-field").classList.remove("none");
   }
   if (currentDisplay === "episodes") {
-    dom.searchContainerWrapper.classList.remove("hidden");
-    dom.searchInput.placeholder = "Search for an episode";
-    Array.from(dom.genresContainer.children).forEach((g) =>
-      g.classList.remove("active")
-    );
-    dom.genresContainer.classList.toggle("none");
-    const { showSelect, episodeSelect, btnShowCta, displaySelect } = dom;
-    toggleNone(showSelect, episodeSelect, btnShowCta, displaySelect);
+    dom.resetGenres();
+    dom.toggleNone(showSelect, episodeSelect, btnShowCta, displaySelect);
+    searchInput.placeholder = "Search for an episode";
+    searchContainerWrapper.classList.remove("hidden");
+    genresContainer.classList.toggle("none");
   }
-}
-
-// Handle inputs display helper.
-function toggleNone(...elements) {
-  elements.forEach((el) =>
-    el.closest(".search-field").classList.toggle("none")
-  );
-}
-
-// Handle Title text content.
-function setTitle(txt) {
-  dom.title.textContent = txt;
 }
 
 window.onload = setup;

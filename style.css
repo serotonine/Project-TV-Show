@@ -351,6 +351,7 @@ h1.page-title {
 
 #loader {
   animation: pulse 1.5s ease-in-out infinite;
+  color:var(--color-white);
   position: absolute;
   z-index: 1000;
   left: 50%;
