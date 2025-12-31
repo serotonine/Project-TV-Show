@@ -68,10 +68,12 @@ function setListeners(dom) {
     const tag = e.target.tagName;
     dom.resetGenres();
     if (tag === "INPUT") {
-      dom.resetSelect(currentDisplay);
-      if (currentDisplay === "episodes" && allEpisodes) {
+
+      dom.resetSelect();
+
+      if (currentDisplay === "episodes") {
         if (target.value) {
-          episodes.searchEpisodes(target.value, allEpisodes);
+          episodes.searchEpisodes(target.value);
         }
       }
       if (currentDisplay === "shows" && allShows) {
@@ -115,6 +117,7 @@ function setListeners(dom) {
   genresContainer.addEventListener("click", async function (e) {
     e.target.classList.toggle("active");
     dom.resetContainer();
+    dom.resetSelect();
     dom.addLoader("shows");
     const actives = document.querySelectorAll(".btn-genre.active");
     await shows.searchShowsByGenres(actives, allShows);
@@ -134,13 +137,14 @@ function setListeners(dom) {
       return;
     }
     currentDisplay = "shows";
-    // Empty container.
     dom.resetContainer();
+    dom.resetSelect();
     dom.addLoader(currentDisplay);
     await shows.makePageForShows(allShows);
     shows.displayPageForShows();
     dom.removeLoader();
     handleSearchDisplay();
+    dom.setCount(`Display ${allShows.length} Shows`);
   });
 
   // Handle episodes display on show item click.
@@ -170,8 +174,8 @@ function setListeners(dom) {
 function handleSearchDisplay() {
    
   dom.resetSearchInput();
-  dom.resetCount();
   dom.resetSelect();
+
   const { 
     searchContainerWrapper,
     showSelect,

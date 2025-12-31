@@ -1,4 +1,4 @@
-import Favorites from "../favorites.js";
+import Favorites from "../Favorites.js";
 
 export default class ShowRender {
   constructor(dom) {

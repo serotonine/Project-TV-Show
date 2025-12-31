@@ -22,14 +22,14 @@ export default class Episode {
    * @param {string} title - The show name.
    * @returns {void}
    */
-  async init(showId, title){
-     this.dom.addLoader("episodes");
-     // Fetch episodes or retrieve from storage.
-      this.allEpisodes = await this.getAllEpisodes(showId);
-      this.dom.setTitle(title);
-      await this.makePageForEpisodes(this.allEpisodes);
-      this.episodeRender.populateEpisodeSelect(this.allEpisodes);
-      this.dom.removeLoader();
+  async init(showId, title) {
+    this.dom.addLoader("episodes");
+    // Fetch episodes or retrieve from storage.
+    this.allEpisodes = await this.getAllEpisodes(showId);
+    this.dom.setTitle(title);
+    await this.makePageForEpisodes(this.allEpisodes);
+    this.episodeRender.populateEpisodeSelect(this.allEpisodes);
+    this.dom.removeLoader();
   }
 
   /**
@@ -53,17 +53,12 @@ export default class Episode {
     }
   }
 
-  
   /**
    * Display all episodes with proper loading.
    * @param {array} episodes - The episodes list.
    * @returns {Promise<void>}
    */
   async makePageForEpisodes(episodes) {
-    
-    /* container.innerHTML = "";
-  addLoader("episodes");  // ← Loader visible */
-
     const fragment = document.createDocumentFragment();
     const visibleImagePromises = [];
 
@@ -75,8 +70,6 @@ export default class Episode {
       // Collect promise only for visible images.
       const img = section.querySelector("img");
       if (img && !img.complete) {
-        // On vérifie si la carte est dans la viewport (au moins partiellement)
-        // Note : on force le reflow après ajout pour que getBoundingClientRect soit fiable
         const isVisible = () => {
           const rect = section.getBoundingClientRect();
           return rect.top < window.innerHeight && rect.bottom > 0;
@@ -133,13 +126,15 @@ export default class Episode {
       selectedEpisodes.forEach((s) => {
         this.container.append(this.episodeRender.createEpisodeElement(s));
       });
-       this.dom.setCount(`Displaying ${selectedEpisodes.length} episodes`);
+      this.dom.setCount(`Displaying ${selectedEpisodes.length} episodes`);
     } else {
       const selectedEpisode = this.allEpisodes.find(
         (episode) => episode.id == value
       );
       if (selectedEpisode) {
-        this.container.append(this.episodeRender.createEpisodeElement(selectedEpisode));
+        this.container.append(
+          this.episodeRender.createEpisodeElement(selectedEpisode)
+        );
         this.dom.resetCount();
       }
     }
@@ -149,22 +144,29 @@ export default class Episode {
    * @param {number || string} showId - The show id.
    * @returns {void}
    */
-  searchEpisodes(value, allEpisodes) {
+  searchEpisodes(value) {
+    if (this.allEpisodes.length === 0) {
+      return;
+    }
     const searchTerm = value.toLowerCase();
     this.dom.resetContainer();
-    const filteredEpisodes = allEpisodes.filter((episode) => {
+    const filteredEpisodes = this.allEpisodes.filter((episode) => {
       const nameMatch = episode.name.toLowerCase().includes(searchTerm);
       const summaryMatch = episode.summary
         ? episode.summary.toLowerCase().includes(searchTerm)
         : false;
       return nameMatch || summaryMatch;
     });
-    // TODO use makeEpisodePage.
-    for (let episode of filteredEpisodes) {
-      const article = this.episodeRender.createEpisodeElement(episode);
-      this.container.append(article);
-    }
     const lg = filteredEpisodes.length;
+    if (lg === 0) {
+      this.makePageForEpisodes(this.allEpisodes);
+    } else {
+      for (let episode of filteredEpisodes) {
+        const article = this.episodeRender.createEpisodeElement(episode);
+        this.container.append(article);
+      }
+    }
+
     const text =
       lg > 0 ? `Displaying ${lg} episode${lg > 1 && "s"}` : `No result found`;
     this.dom.setCount(text);

@@ -44,6 +44,7 @@ export default class Dom {
    * @returns {void}
    */
   addLoader(currentDisplay) {
+    // console.trace("addLoader");
     const { container } = this.elements;
     const loader = this.loader; // Utilisation du getter loader
     loader.textContent = `Loading ${currentDisplay}...`;
@@ -54,6 +55,7 @@ export default class Dom {
    * @returns {void}
    */
   removeLoader() {
+    // console.trace("removeLoader");
     const loader = document.getElementById("loader");
     if (loader) {
       loader.remove();

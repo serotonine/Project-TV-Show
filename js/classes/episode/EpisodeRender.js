@@ -67,16 +67,35 @@ export default class EpisodeRender {
   }
 
   /**
+   * Returns the select where all the Episode items are displayed.
+   * @returns {HTMLElement}
+   */
+  get episodeSelect() {
+    return this.dom.elements.episodeSelect;
+  }
+
+  /**
+   * Empty the select element.
+   * @returns {void}
+   */
+  emptyEpisodeSelect(){
+    const children = this.episodeSelect.children;
+    const lg = children.length - 1;
+    for( let i= lg ; i >=1; i--){
+      this.episodeSelect.removeChild(children[i]);
+    }
+  }
+
+  /**
    * Populate the select element with all the shows.
    * @param {array} the episodes list.
    * @returns {void}
    */
   populateEpisodeSelect(allEpisodes) {
-    const { episodeSelect, searchInput } = this.dom.elements;
+    this.emptyEpisodeSelect();
     const episodesBySeason = this.getEpisodesBySeason(allEpisodes);
-    //searchInput.innerHTML = "";
     episodesBySeason.forEach((episodes, season) => {
-      const nbTxt = (nb) => ("" + season).padStart(2, "0");
+      const nbTxt = () => ("" + season).padStart(2, "0");
       const optGroup = document.createElement("optgroup");
       optGroup.label = `Season ${nbTxt(season)}`;
       const optionSeason = document.createElement("option");
@@ -90,11 +109,11 @@ export default class EpisodeRender {
         option.textContent = `${episodeId} - ${episode.name}`;
         optGroup.appendChild(option);
       });
-      episodeSelect.appendChild(optGroup);
+      this.episodeSelect.appendChild(optGroup);
     });
+    this.dom.setCount(`Display ${episodesBySeason.size} seasons`);
   }
 
-  //
   /**
    * Group episodes by Season.
    * @param {array} allEpisodes - The episodes list.
