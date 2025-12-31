@@ -48,8 +48,8 @@ export default class ShowRender {
 
     // Summary.
     const summary = document.createElement("div");
-    summary.className = "show-summary";
-    summary.innerHTML = show.summary;
+    summary.className = "summary show-summary";
+    summary.innerHTML = this.dom.cleanSummary(show.summary);
     content.appendChild(summary);
 
     // Genres.
@@ -76,10 +76,10 @@ export default class ShowRender {
       `<span class="active">&#x2605;</span>`.repeat(average) +
       `<span>&#x2605;</span>`.repeat(10 - average);
     content.appendChild(rating);
-
     // Link to Official Website.
     if (show.officialSite) {
       const link = document.createElement("a");
+      link.className="show-link";
       link.href = show.officialSite;
       link.target = "_blank";
       link.rel = "noopener noreferrer";

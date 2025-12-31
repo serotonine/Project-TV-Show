@@ -15,13 +15,19 @@ export default class EpisodeRender {
     const banner = document.createElement("div");
     const figure = document.createElement("figure");
     const img = document.createElement("img");
+    const wrapper = document.createElement("div");
+    const title = document.createElement("h2");
     const body = document.createElement("div");
+    const link = document.createElement("p");
 
     // Set attributes.
-    article.classList.add("episode");
-    banner.classList.add("episode-banner");
-    figure.classList.add("episode-figure");
-    body.classList.add("episode-body");
+    article.className = "episode";
+    banner.className = "episode-banner";
+    figure.className = "episode-figure";
+    wrapper.className = "episode-wrapper";
+    body.className = "episode-summary summary";
+    link.className = "episode-link";
+    
     article.dataset.id = id;
     article.setAttribute("aria-label", name);
 
@@ -30,18 +36,20 @@ export default class EpisodeRender {
       "" + number
     ).padStart(2, "0")}`;
     banner.innerHTML = `<p>${episodeId}</p>`;
-    body.innerHTML = `<h2>${name}</h2>
-    <p>${summary}</p>
-    <p class="episode-link">
-    <a href=${url} alt=${episodeId} target="_blank">
+    title.textContent = name;
+    body.innerHTML = this.dom.cleanSummary(summary);
+    link.innerHTML = `<a href=${url} alt=${episodeId} target="_blank">
     <span>Watch on Maze</span>
-    ${this.dom.SVGLink}
-</a></p>`;
+    ${this.dom.SVGLink}</a></p>`;
     // Append.
     figure.appendChild(img);
     article.appendChild(banner);
     article.appendChild(figure);
-    article.appendChild(body);
+    wrapper.appendChild(title);
+    wrapper.appendChild(body);
+    wrapper.appendChild(link);
+    article.appendChild(wrapper);
+
     // Handle Image.
     if (image?.medium) {
       img.src = image?.medium;

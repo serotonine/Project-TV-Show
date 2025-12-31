@@ -157,7 +157,7 @@ function setListeners(dom) {
     if (!id || !title) {
       return;
     }
-    dom.resetContainer();
+    
     dom.resetSearchInput();
 
     if (e.target.classList.contains("heart")) {
@@ -165,6 +165,7 @@ function setListeners(dom) {
       e.target.classList.toggle("active");
     } else {
       currentDisplay = "episodes";
+      dom.resetContainer();
       await episodes.init(id, title);
       handleSearchDisplay();
     }

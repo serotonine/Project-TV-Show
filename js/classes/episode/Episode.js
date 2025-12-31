@@ -64,14 +64,14 @@ export default class Episode {
 
     // Create all episodes.
     for (let episode of episodes) {
-      const section = this.episodeRender.createEpisodeElement(episode);
-      fragment.appendChild(section);
+      const article = this.episodeRender.createEpisodeElement(episode);
+      fragment.appendChild(article);
 
       // Collect promise only for visible images.
-      const img = section.querySelector("img");
+      const img = article.querySelector("img");
       if (img && !img.complete) {
         const isVisible = () => {
-          const rect = section.getBoundingClientRect();
+          const rect = article.getBoundingClientRect();
           return rect.top < window.innerHeight && rect.bottom > 0;
         };
 
@@ -79,20 +79,20 @@ export default class Episode {
           visibleImagePromises.push(
             new Promise((resolve) => {
               img.onload = () => {
-                section.classList.add("loaded");
+                article.classList.add("loaded");
                 resolve();
               };
               img.onerror = () => {
-                section.classList.add("loaded");
+                article.classList.add("loaded");
                 resolve();
               };
             })
           );
         } else {
-          img.onload = img.onerror = () => section.classList.add("loaded");
+          img.onload = img.onerror = () => article.classList.add("loaded");
         }
       } else if (!img) {
-        section.classList.add("loaded");
+        article.classList.add("loaded");
       }
     }
     this.container.appendChild(fragment);

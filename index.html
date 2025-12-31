@@ -14,9 +14,9 @@
     <div id="root">
       <header class="header">
         <div class="header-wrapper">
-          <h1 class="page-title">
+          <h1 class="page-title" aria-label="All TV shows">
             <span class="page-title-current">All TV shows</span>
-            <span><small>Source: <a href="https://tvmaze.com/">TVMaze.com</a></small></span>
+            <span><small>Source: <a href="https://tvmaze.com/" aria-label="Visit TVMaze">TVMaze.com</a></small></span>
           </h1>
           </div.header-wrapper>
 
@@ -30,20 +30,20 @@
               </button>
               </div>
             <div class="search-field field-show-select" data>
-              <select id="show-select" class="show-select">
+              <select id="show-select" class="show-select" aria-label="Select a TV Show">
                 <option value="null">Select a Show</option>
               </select>
             </div>
             <div class="search-field field-episode-select">
-              <select id="episode-select" class="episode-select">
+              <select id="episode-select" class="episode-select" aria-label="Select an episode">
                 <option value="all-episodes">All Episodes by Season</option>
               </select>
             </div>
             <div class="search-field field-search-input">
-              <input type="text" id="search-input" class="search-input" placeholder="" />
+              <input type="text" id="search-input" class="search-input" placeholder="" aria-label="Search by word"/>
             </div>
             <div class="search-field field-display-by">
-              <select id="display-select" class="display-select">
+              <select id="display-select" class="display-select" aria-label="Select by display type">
                 <option value="name">Display by Name</option>
                 <option value="start">Display by Premiered Date</option>
                 <option value="favorites">Display by favorites</option>
