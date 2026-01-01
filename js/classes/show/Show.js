@@ -83,7 +83,6 @@ export default class Show {
       return Promise.resolve();
     }
     this.dom.resetContainer();
-    this.container.classList.toggle("shows-wrapper", true);
     const fragment = document.createDocumentFragment();
     const visibleImagePromises = [];
 
