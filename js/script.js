@@ -104,9 +104,8 @@ function setListeners(dom) {
       }
       else if (e.target.id === "display-select") {
         const count = await shows.sortPageForShows(e.target.value, allShows);
-        dom.setCount(`Display ${count} show${
-          count > 1 ? "s" : ""
-        }.`);
+        dom.setCount(dom.setPlurial(count, "show"));
+        
       } else {
         return;
       }

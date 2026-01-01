@@ -165,7 +165,7 @@ export default class Show {
     if (lg > 0) {
       await this.makePageForShows(filteredShows);
       this.displayPageForShows();
-      message = `Displaying ${lg} Show${lg > 1 ? "s" : ""}.`;
+      message = this.dom.setPlurial(lg, "Show");
     } else {
       message = `No Show found.`;
     }

@@ -168,7 +168,8 @@ export default class Episode {
     }
 
     const text =
-      lg > 0 ? `Displaying ${lg} episode${lg > 1 && "s"}` : `No result found`;
+      lg > 0 ? dom.setPlurial(lg, "episode") : `No result found`;
     this.dom.setCount(text);
+    
   }
 }

@@ -152,8 +152,17 @@ export default class Dom {
    * @returns {string} 
    */
   cleanSummary(text){
+    if(!text){return;};
     const noTag = text.replace(/<\/?p>/g, ' ').trim();
     return `<p>${noTag}</p>`;
+  }
+  /**
+   * Set plurial.
+   * @param {nb} lg - The length.
+   * @returns {string} 
+   */
+  setPlurial(lg, term){
+    return `Displaying ${lg} ${term}${lg > 1 ? "s" : ""}.`;
   }
 
   /**

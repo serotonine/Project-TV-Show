@@ -37,7 +37,7 @@ export default class EpisodeRender {
     ).padStart(2, "0")}`;
     banner.innerHTML = `<p>${episodeId}</p>`;
     title.textContent = name;
-    body.innerHTML = this.dom.cleanSummary(summary);
+    body.innerHTML = this.dom.cleanSummary(summary) || "";
     link.innerHTML = `<a href=${url} alt=${episodeId} target="_blank">
     <span>Watch on Maze</span>
     ${this.dom.SVGLink}</a></p>`;
@@ -119,7 +119,7 @@ export default class EpisodeRender {
       });
       this.episodeSelect.appendChild(optGroup);
     });
-    this.dom.setCount(`Display ${episodesBySeason.size} seasons`);
+    this.dom.setCount(this.dom.setPlurial(episodesBySeason.size, "Season"));
   }
 
   /**
