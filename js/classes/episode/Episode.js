@@ -1,5 +1,6 @@
 import { fetchData } from "../../includes/httpRequests.js";
 import EpisodeRender from "./EpisodeRender.js";
+import SlideShow from "../../includes/slideshow/SlideShow.js";
 
 export default class Episode {
   constructor(dom) {
@@ -64,7 +65,7 @@ export default class Episode {
 
     // Create all episodes.
     for (let episode of episodes) {
-      const article = this.episodeRender.createEpisodeElement(episode);
+      const article = await this.episodeRender.createEpisodeElement(episode);
       fragment.appendChild(article);
 
       // Collect promise only for visible images.
@@ -118,15 +119,22 @@ export default class Episode {
         this.container.append(this.episodeRender.createEpisodeElement(episode));
       }
       this.dom.setCount(`Displaying ${allEpisodes.length} episodes`);
-    } else if (value.charAt(0) === "S") {
+    } 
+    // Seasons.
+    else if (value.charAt(0) === "S") {
       const seasonId = value.substring(1);
       const selectedEpisodes = this.allEpisodes.filter(
         (episode) => episode.season == seasonId
       );
+      // SlideShow
+      const slides = new DocumentFragment();
       selectedEpisodes.forEach((s) => {
-        this.container.append(this.episodeRender.createEpisodeElement(s));
+        slides.appendChild(this.episodeRender.createEpisodeElement(s));
       });
-      this.dom.setCount(`Displaying ${selectedEpisodes.length} episodes`);
+      const slideShow = new SlideShow(this.container, slides);
+      slideShow.init();
+      const message = `Season ${seasonId}: displaying ${selectedEpisodes.length} episodes`;
+      this.dom.setCount(message);
     } else {
       const selectedEpisode = this.allEpisodes.find(
         (episode) => episode.id == value

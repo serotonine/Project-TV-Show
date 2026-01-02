@@ -78,10 +78,11 @@ export default class Show {
    */
   async makePageForShows(allShows) {
 
-    if (!Array.isArray(allShows) || !allShows.length) {
+    if (!Array.isArray(allShows)) {
       this.dom.setError("Show list is wrong. Check why.");
       return Promise.resolve();
     }
+  
     this.dom.resetContainer();
     const fragment = document.createDocumentFragment();
     const visibleImagePromises = [];

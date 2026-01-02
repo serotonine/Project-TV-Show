@@ -21,6 +21,7 @@ export default class Favorites {
       updatedFavorites = localFavorites.filter((show) => show.id != id);
     }
     localStorage.setItem("shows", JSON.stringify(updatedFavorites));
+    return updatedFavorites;
   }
 
   static isFavorite(id) {

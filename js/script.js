@@ -161,7 +161,12 @@ function setListeners(dom) {
 
     if (e.target.classList.contains("heart")) {
       Favorites.handleFavorites(id, allShows);
+      if(dom.elements.displaySelect.value === "favorites"){
+        const currentFavorite = document.querySelector(`article[data-id="${id}"]`);
+        currentFavorite.remove();
+      }
       e.target.classList.toggle("active");
+
     } else {
       currentDisplay = "episodes";
       dom.resetContainer();
