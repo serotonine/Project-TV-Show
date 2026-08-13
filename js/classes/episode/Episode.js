@@ -110,7 +110,7 @@ export default class Episode {
    * @param {number || string} showId - The show id.
    * @returns {void}
    */
-  getSelectedEpisode(value, allEpisodes) {
+  getSelectedEpisode(value) {
     const { episodeCount } = this.dom.elements;
     this.dom.resetContainer();
 
@@ -118,7 +118,8 @@ export default class Episode {
       for (let episode of this.allEpisodes) {
         this.container.append(this.episodeRender.createEpisodeElement(episode));
       }
-      this.dom.setCount(`Displaying ${allEpisodes.length} episodes`);
+      const nbSeasons = this.episodeRender.getEpisodesBySeason(this.allEpisodes);
+      this.dom.setCount(this.dom.setPlurial(nbSeasons.size, "season"));
     } 
     // Seasons.
     else if (value.charAt(0) === "S") {
@@ -177,7 +178,7 @@ export default class Episode {
 
     const text =
       lg > 0 ? dom.setPlurial(lg, "episode") : `No result found`;
-    this.dom.setCount(text);
+      this.dom.setCount(text);
     
   }
 }

@@ -119,7 +119,7 @@ export default class EpisodeRender {
       });
       this.episodeSelect.appendChild(optGroup);
     });
-    this.dom.setCount(this.dom.setPlurial(episodesBySeason.size, "Season"));
+    this.dom.setCount(this.dom.setPlurial(episodesBySeason.size, "season"));
   }
 
   /**

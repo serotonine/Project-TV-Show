@@ -100,7 +100,7 @@ function setListeners(dom) {
         handleSearchDisplay();
       }
       else if (e.target.id === "episode-select") {
-        episodes.getSelectedEpisode(e.target.value || null, allEpisodes);
+        episodes.getSelectedEpisode(e.target.value || null);
       }
       else if (e.target.id === "display-select") {
         const count = await shows.sortPageForShows(e.target.value, allShows);
