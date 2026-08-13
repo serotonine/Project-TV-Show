@@ -115,7 +115,7 @@ export default class Episode {
     this.dom.resetContainer();
 
     if (value === "all-episodes") {
-      for (let episode of allEpisodes) {
+      for (let episode of this.allEpisodes) {
         this.container.append(this.episodeRender.createEpisodeElement(episode));
       }
       this.dom.setCount(`Displaying ${allEpisodes.length} episodes`);
