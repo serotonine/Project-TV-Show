@@ -1,5 +1,6 @@
 export default class SlideShow {
-  constructor(container, slides) {
+  constructor(id, container, slides) {
+    this.id = id;
     this.container = container;
     this.slides = slides || [];
 
@@ -16,9 +17,11 @@ export default class SlideShow {
   }
 
   setListeners() {
-    const back = document.getElementById("backward-btn");
-    const forward = document.getElementById("forward-btn");
-    const slideShowSlides = document.querySelector(".slideshow-slides");
+    const slideShow = document.getElementById(this.id);
+    if(!slideShow){ return; }
+    const slideShowSlides = slideShow.querySelector(".slideshow-slides");
+    const back = slideShow.querySelector(".backward-btn");
+    const forward = slideShow.querySelector(".forward-btn");
 
     slideShowSlides.addEventListener("transitionend", () => {
       this.currentId === 0
@@ -29,7 +32,7 @@ export default class SlideShow {
         : forward.classList.remove("hidden");
     });
 
-    document.getElementById("forward-btn").addEventListener("click", (e) => {
+    forward.addEventListener("click", (e) => {
       this.moveSlide(e.target);
     });
     back.addEventListener("click", (e) => {
@@ -43,13 +46,12 @@ export default class SlideShow {
     const back = document.createElement("button");
     const forward = document.createElement("button");
     slideShow.className = "slideshow";
+    slideShow.id = `${this.id}`;
     slideShowSlides.className = "slideshow-slides";
-    back.className = "slideshow-btn hidden";
-    back.id = "backward-btn";
-    back.setAttribute("aria-label","previous episodes")
-    forward.className = "slideshow-btn";
-    forward.id = "forward-btn";
-    forward.setAttribute("aria-label","next episodes")
+    back.className = "slideshow-btn hidden backward-btn";
+    back.setAttribute("aria-label", "previous episodes");
+    forward.className = "slideshow-btn forward-btn";
+    forward.setAttribute("aria-label", "next episodes");
     slideShowSlides.appendChild(this.slides);
     slideShow.appendChild(slideShowSlides);
     slideShow.appendChild(back);
@@ -68,24 +70,21 @@ export default class SlideShow {
 
   // Manual.
   moveSlide(el) {
-    let direction;
     // Last screen visibility.
     this.maxId = Math.max(0, this.lg - this.page);
-    switch (el.id) {
-      case "forward-btn":
-        direction = "next";
-        this.currentId = Math.min(this.currentId + this.page, this.maxId);
-        break;
-      case "backward-btn":
-        direction = "prev";
-        this.currentId = Math.max(this.currentId - this.page, 0);
-        break;
+    if (el.classList.contains("forward-btn")) {
+      this.currentId = Math.min(this.currentId + this.page, this.maxId);
+      this.translateSlideShow();
     }
-    this.translateSlideShow(direction);
+    else if (el.classList.contains("backward-btn")) {
+      this.currentId = Math.max(this.currentId - this.page, 0);
+      this.translateSlideShow();
+    }
   }
   // Slider animation.
-  translateSlideShow(direction) {
-    const slideShowSlides = document.querySelector(".slideshow-slides");
+  translateSlideShow() {
+    const slideShow = document.getElementById(`${this.id}`);
+    const slideShowSlides = slideShow.querySelector(".slideshow-slides");
     // clamp to avoid to override on right.
     const maxTranslate = Math.max(
       0,

@@ -67,9 +67,11 @@ img {
   height: auto;
   display: block;
 }
-#root{
+
+#root {
   padding: 0 2rem;
 }
+
 @media (min-width: 992px) {
   #root {
     padding: 0 4rem;
@@ -121,7 +123,8 @@ img {
   gap: 2rem;
   position: relative;
 }
-@media(min-width:992px){
+
+@media(min-width:992px) {
   #main-wrapper {
     gap: 2.5rem;
   }
@@ -268,8 +271,9 @@ img {
     background-color: var(--color-blue-dark);
   }
 }
+
 @media (min-width: 992px) {
-  .btn-show-cta{
+  .btn-show-cta {
     min-width: 15ch;
   }
 }
@@ -453,6 +457,16 @@ img {
 .heart.active {
   background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjRweCIgaGVpZ2h0PSIyNHB4IiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iI2YzMDlhZCIgZD0ibTEyIDIxLjM1bC0xLjQ1LTEuMzJDNS40IDE1LjM2IDIgMTIuMjcgMiA4LjVDMiA1LjQxIDQuNDIgMyA3LjUgM2MxLjc0IDAgMy40MS44MSA0LjUgMi4wOEMxMy4wOSAzLjgxIDE0Ljc2IDMgMTYuNSAzQzE5LjU4IDMgMjIgNS40MSAyMiA4LjVjMCAzLjc3LTMuNCA2Ljg2LTguNTUgMTEuNTN6Ii8+PC9zdmc+');
   opacity: 1;
+}
+
+/* Episodes */
+.season {
+  grid-column: 1 / -1;
+  /* pointer-events: none; */
+}
+.season > h5 {
+  color:var(--color-white);
+  margin-block-end: 1em;
 }
 
 /* Animations */

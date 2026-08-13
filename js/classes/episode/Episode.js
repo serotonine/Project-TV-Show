@@ -8,6 +8,7 @@ export default class Episode {
     this.episodeRender = new EpisodeRender(dom);
     this.episodeCache = {};
     this.allEpisodes = [];
+    this.showId = null;
   }
   /**
    * Returns the container where all the Episode items are displayed.
@@ -24,11 +25,12 @@ export default class Episode {
    * @returns {void}
    */
   async init(showId, title) {
+    this.showId = showId;
     this.dom.addLoader("episodes");
     // Fetch episodes or retrieve from storage.
     this.allEpisodes = await this.getAllEpisodes(showId);
     this.dom.setTitle(title);
-    await this.makePageForEpisodes(this.allEpisodes);
+    await this.createEpisodesBySeasons(this.allEpisodes);
     this.episodeRender.populateEpisodeSelect(this.allEpisodes);
     this.dom.removeLoader();
   }
@@ -55,17 +57,38 @@ export default class Episode {
   }
 
   /**
+   * Display all episodes g.
+   * @param {array} episodes - The episodes list.
+   * @returns {Promise<void>}
+   */
+  async createEpisodesBySeasons(allEpisodes) {
+    const seasons = this.episodeRender.getEpisodesBySeason(allEpisodes);
+    for (let [nb, episodes] of seasons){
+      const section = document.createElement("section");
+      section.className = "season";
+      const seasonTitle = document.createElement("h5");
+      seasonTitle.textContent = `Season ${nb}`;
+      section.appendChild(seasonTitle);
+      const slides = await this.createEpisode(episodes,section);
+      const slideShow = new SlideShow(`${this.showId}-S${nb}`,section, slides);
+      this.container.appendChild(section);
+      slideShow.init();
+    }
+ 
+  }
+
+  /**
    * Display all episodes with proper loading.
    * @param {array} episodes - The episodes list.
    * @returns {Promise<void>}
    */
-  async makePageForEpisodes(episodes) {
-    const fragment = document.createDocumentFragment();
+  async createEpisode(episodes, container) {
+    const fragment = new DocumentFragment();
     const visibleImagePromises = [];
 
     // Create all episodes.
     for (let episode of episodes) {
-      const article = await this.episodeRender.createEpisodeElement(episode);
+      const article = this.episodeRender.createEpisodeElement(episode);
       fragment.appendChild(article);
 
       // Collect promise only for visible images.
@@ -96,13 +119,12 @@ export default class Episode {
         article.classList.add("loaded");
       }
     }
-    this.container.appendChild(fragment);
+    
     // Reflow.
-    void this.container.offsetHeight;
     if (visibleImagePromises.length > 0) {
       await Promise.all(visibleImagePromises);
     }
-    this.dom.removeLoader();
+    return fragment;
   }
 
   /**
@@ -114,9 +136,7 @@ export default class Episode {
     this.dom.resetContainer();
 
     if (value === "all-episodes") {
-      for (let episode of this.allEpisodes) {
-        this.container.append(this.episodeRender.createEpisodeElement(episode));
-      }
+      this.createEpisodesBySeasons(this.allEpisodes);
       const nbSeasons = this.episodeRender.getEpisodesBySeason(
         this.allEpisodes,
       );
@@ -133,7 +153,7 @@ export default class Episode {
       selectedEpisodes.forEach((s) => {
         slides.appendChild(this.episodeRender.createEpisodeElement(s));
       });
-      const slideShow = new SlideShow(this.container, slides);
+      const slideShow = new SlideShow(`${this.showId}-S${seasonId}`, this.container, slides)
       slideShow.init();
       const message = `Season ${seasonId}: displaying ${selectedEpisodes.length} episodes`;
       this.dom.setCount(message);
@@ -169,7 +189,7 @@ export default class Episode {
     });
     const lg = filteredEpisodes.length;
     if (lg === 0) {
-      this.makePageForEpisodes(this.allEpisodes);
+      this.createEpisodesBySeasons(this.allEpisodes);
     } else {
       for (let episode of filteredEpisodes) {
         const article = this.episodeRender.createEpisodeElement(episode);
