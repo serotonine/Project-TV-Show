@@ -21,10 +21,14 @@ export default class SlideShow {
     const slideShowSlides = document.querySelector(".slideshow-slides");
 
     slideShowSlides.addEventListener("transitionend", () => {
-       this.currentId === 0 ? back.classList.add("hidden") :  back.classList.remove("hidden");
-       this.currentId >= this.maxId ? forward.classList.add("hidden") : forward.classList.remove("hidden");
+      this.currentId === 0
+        ? back.classList.add("hidden")
+        : back.classList.remove("hidden");
+      this.currentId >= this.maxId
+        ? forward.classList.add("hidden")
+        : forward.classList.remove("hidden");
     });
-    
+
     document.getElementById("forward-btn").addEventListener("click", (e) => {
       this.moveSlide(e.target);
     });
@@ -42,8 +46,10 @@ export default class SlideShow {
     slideShowSlides.className = "slideshow-slides";
     back.className = "slideshow-btn hidden";
     back.id = "backward-btn";
+    back.setAttribute("aria-label","previous episodes")
     forward.className = "slideshow-btn";
     forward.id = "forward-btn";
+    forward.setAttribute("aria-label","next episodes")
     slideShowSlides.appendChild(this.slides);
     slideShow.appendChild(slideShowSlides);
     slideShow.appendChild(back);
@@ -83,14 +89,12 @@ export default class SlideShow {
     // clamp to avoid to override on right.
     const maxTranslate = Math.max(
       0,
-      slideShowSlides.scrollWidth - this.slideShowW
+      slideShowSlides.scrollWidth - this.slideShowW,
     );
 
     const wanted = this.step * this.currentId;
     const x = Math.min(wanted, maxTranslate);
-    console.log(this.currentId);
 
     slideShowSlides.style.transform = `translateX(${-x}px)`;
-
   }
 }

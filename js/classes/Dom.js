@@ -13,7 +13,7 @@ export default class Dom {
       rootElem: document.getElementById("root"),
       container: document.getElementById("main-wrapper"),
       searchContainerWrapper: document.getElementById(
-        "search-container-wrapper"
+        "search-container-wrapper",
       ),
       searchContainer: document.getElementById("search-container"),
       genresContainer: document.getElementById("genres-container"),
@@ -149,19 +149,21 @@ export default class Dom {
   /**
    * Remove several <p>.
    * @param {string} text - The summary.
-   * @returns {string} 
+   * @returns {string}
    */
-  cleanSummary(text){
-    if(!text){return;};
-    const noTag = text.replace(/<\/?p>/g, ' ').trim();
-    return `<p>${noTag}</p>`;
+  cleanSummary(text) {
+    if (!text) {
+      return;
+    }
+    const noTag = new DOMParser().parseFromString(text, "text/html");
+    return `<p>${noTag.body.textContent.trim()}</p>`;
   }
   /**
    * Set plurial.
    * @param {nb} lg - The length.
-   * @returns {string} 
+   * @returns {string}
    */
-  setPlurial(lg, term){
+  setPlurial(lg, term) {
     return `Displaying ${lg} ${term}${lg > 1 ? "s" : ""}.`;
   }
 
@@ -206,7 +208,7 @@ export default class Dom {
       intersectionObserver.observe(searchContainerWrapper);
 
       btnBackToTop.addEventListener("click", () =>
-        window.scrollTo({ top: 0, behavior: "smooth" })
+        window.scrollTo({ top: 0, behavior: "smooth" }),
       );
     }
   }
@@ -215,9 +217,9 @@ export default class Dom {
    * Handle inputs display helper.
    * @params {HTMLElements} list od HTMLElements
    */
-toggleNone(...elements) {
-  elements.forEach((el) =>
-    el.closest(".search-field").classList.toggle("none")
-  );
-}
+  toggleNone(...elements) {
+    elements.forEach((el) =>
+      el.closest(".search-field").classList.toggle("none"),
+    );
+  }
 }

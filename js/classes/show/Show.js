@@ -122,23 +122,6 @@ export default class Show {
   }
 
   /**
-   * Display Sorted Shows.
-   * @param {Array} sortedShows - The sorted shows to display.
-   * @returns {void}
-   */
-  makePageForSortedShows(sortedShows) {
-    this.dom.resetContainer();
-    const fragment = document.createDocumentFragment();
-
-    for (let show of sortedShows) {
-      const current = this.createShowElement(show);
-      current.classList.add("loaded");
-      fragment.appendChild(current);
-    }
-    this.container.appendChild(fragment);
-  }
-
-  /**
    * Add class "loaded" to set opacity:1.
    * @returns {void}
    */

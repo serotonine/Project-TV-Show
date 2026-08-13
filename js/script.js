@@ -22,7 +22,6 @@ let episodes;
 
 // Set Up.
 function setup() {
-
   // Classes instantiation.
   dom = new Dom();
   episodes = new Episode(dom);
@@ -31,7 +30,7 @@ function setup() {
   // Back to top;
   dom.backToTop();
 
-  // Let's partying ! 
+  // Let's partying !
   fetchData()
     .then(async (response) => {
       // Store the whole shows.
@@ -40,12 +39,12 @@ function setup() {
       currentDisplay = "shows";
       // Classes instantiation.
       shows = new Show(dom, allShows);
-      /* 
+      /*
        * Wait images loaded.
        * All shows displayed
        * Select and genres displayed.
-      */
-     // Usefull when back to shows.
+       */
+      // Usefull when back to shows.
       allShows = await shows.init();
       handleSearchDisplay();
       dom.removeLoader();
@@ -68,7 +67,6 @@ function setListeners(dom) {
     const tag = e.target.tagName;
     dom.resetGenres();
     if (tag === "INPUT") {
-
       dom.resetSelect();
 
       if (currentDisplay === "episodes") {
@@ -88,7 +86,6 @@ function setListeners(dom) {
       }
     }
     if (tag === "SELECT") {
-
       dom.resetContainer();
       dom.resetSearchInput();
 
@@ -98,14 +95,11 @@ function setListeners(dom) {
         const selectedShowTitle = e.target.selectedOptions[0].text;
         await episodes.init(selectedShowId, selectedShowTitle);
         handleSearchDisplay();
-      }
-      else if (e.target.id === "episode-select") {
+      } else if (e.target.id === "episode-select") {
         episodes.getSelectedEpisode(e.target.value || null);
-      }
-      else if (e.target.id === "display-select") {
+      } else if (e.target.id === "display-select") {
         const count = await shows.sortPageForShows(e.target.value, allShows);
         dom.setCount(dom.setPlurial(count, "show"));
-        
       } else {
         return;
       }
@@ -156,17 +150,20 @@ function setListeners(dom) {
     if (!id || !title) {
       return;
     }
-    
+
     dom.resetSearchInput();
 
     if (e.target.classList.contains("heart")) {
       Favorites.handleFavorites(id, allShows);
-      if(dom.elements.displaySelect.value === "favorites"){
-        const currentFavorite = document.querySelector(`article[data-id="${id}"]`);
+      if (dom.elements.displaySelect.value === "favorites") {
+        const currentFavorite = document.querySelector(
+          `article[data-id="${id}"]`,
+        );
         currentFavorite.remove();
+        const count = Favorites.getFavorites().length;
+        dom.setCount(dom.setPlurial(count, "show"));
       }
       e.target.classList.toggle("active");
-
     } else {
       currentDisplay = "episodes";
       dom.resetContainer();
@@ -177,18 +174,18 @@ function setListeners(dom) {
 }
 // Handle inputs display.
 function handleSearchDisplay() {
-   
   dom.resetSearchInput();
   dom.resetSelect();
 
-  const { 
+  const {
     searchContainerWrapper,
     showSelect,
     episodeSelect,
     btnShowCta,
     displaySelect,
     searchInput,
-    genresContainer } = dom.elements;
+    genresContainer,
+  } = dom.elements;
 
   if (currentDisplay === "shows") {
     dom.setTitle("All TV shows");

@@ -14,7 +14,6 @@ export default class EpisodeRender {
     const article = document.createElement("article");
     const banner = document.createElement("div");
     const figure = document.createElement("figure");
-    const img = document.createElement("img");
     const wrapper = document.createElement("div");
     const title = document.createElement("h2");
     const body = document.createElement("div");
@@ -27,7 +26,7 @@ export default class EpisodeRender {
     wrapper.className = "episode-wrapper";
     body.className = "episode-summary summary";
     link.className = "episode-link";
-    
+
     article.dataset.id = id;
     article.setAttribute("aria-label", name);
 
@@ -38,21 +37,14 @@ export default class EpisodeRender {
     banner.innerHTML = `<p>${episodeId}</p>`;
     title.textContent = name;
     body.innerHTML = this.dom.cleanSummary(summary) || "";
-    link.innerHTML = `<a href=${url} alt=${episodeId} target="_blank">
+    link.innerHTML = `<a href="${url}" aria-label="${episodeId}" target="_blank">
     <span>Watch on Maze</span>
-    ${this.dom.SVGLink}</a></p>`;
-    // Append.
-    figure.appendChild(img);
-    article.appendChild(banner);
-    article.appendChild(figure);
-    wrapper.appendChild(title);
-    wrapper.appendChild(body);
-    wrapper.appendChild(link);
-    article.appendChild(wrapper);
+    ${this.dom.SVGLink}</a>`;
 
     // Handle Image.
-    if (image?.medium) {
-      img.src = image?.medium;
+    if (image?.medium || image?.original) {
+      const img = document.createElement("img");
+      img.src = image.medium ?? image.original;
       img.alt = name;
       img.width = 250;
       img.height = 140;
@@ -71,6 +63,13 @@ export default class EpisodeRender {
       // No image.
       article.classList.add("loaded");
     }
+    // Append.
+    article.appendChild(banner);
+    article.appendChild(figure);
+    wrapper.appendChild(title);
+    wrapper.appendChild(body);
+    wrapper.appendChild(link);
+    article.appendChild(wrapper);
     return article;
   }
 
@@ -86,11 +85,9 @@ export default class EpisodeRender {
    * Empty the select element.
    * @returns {void}
    */
-  emptyEpisodeSelect(){
-    const children = this.episodeSelect.children;
-    const lg = children.length - 1;
-    for( let i= lg ; i >=1; i--){
-      this.episodeSelect.removeChild(children[i]);
+  emptyEpisodeSelect() {
+    while (this.episodeSelect.children.length > 1) {
+      this.episodeSelect.removeChild(this.episodeSelect.lastChild);
     }
   }
 

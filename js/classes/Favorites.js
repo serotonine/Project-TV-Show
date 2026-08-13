@@ -2,7 +2,7 @@ export default class Favorites {
   constructor() {}
   // Get localStorage.
   static getFavorites() {
-    return JSON.parse(localStorage.getItem("shows")) || [];
+    return JSON.parse(localStorage.getItem("all-tv-shows-favorites")) || [];
   }
   // Add or remove show from localStorage.
   static handleFavorites(id, shows) {
@@ -20,7 +20,7 @@ export default class Favorites {
       // In local storage: remove it.
       updatedFavorites = localFavorites.filter((show) => show.id != id);
     }
-    localStorage.setItem("shows", JSON.stringify(updatedFavorites));
+    localStorage.setItem("all-tv-shows-favorites", JSON.stringify(updatedFavorites));
     return updatedFavorites;
   }
 

@@ -87,7 +87,7 @@ export default class Episode {
                 article.classList.add("loaded");
                 resolve();
               };
-            })
+            }),
           );
         } else {
           img.onload = img.onerror = () => article.classList.add("loaded");
@@ -111,21 +111,22 @@ export default class Episode {
    * @returns {void}
    */
   getSelectedEpisode(value) {
-    const { episodeCount } = this.dom.elements;
     this.dom.resetContainer();
 
     if (value === "all-episodes") {
       for (let episode of this.allEpisodes) {
         this.container.append(this.episodeRender.createEpisodeElement(episode));
       }
-      const nbSeasons = this.episodeRender.getEpisodesBySeason(this.allEpisodes);
+      const nbSeasons = this.episodeRender.getEpisodesBySeason(
+        this.allEpisodes,
+      );
       this.dom.setCount(this.dom.setPlurial(nbSeasons.size, "season"));
-    } 
+    }
     // Seasons.
     else if (value.charAt(0) === "S") {
       const seasonId = value.substring(1);
       const selectedEpisodes = this.allEpisodes.filter(
-        (episode) => episode.season == seasonId
+        (episode) => episode.season == seasonId,
       );
       // SlideShow
       const slides = new DocumentFragment();
@@ -138,11 +139,11 @@ export default class Episode {
       this.dom.setCount(message);
     } else {
       const selectedEpisode = this.allEpisodes.find(
-        (episode) => episode.id == value
+        (episode) => episode.id == value,
       );
       if (selectedEpisode) {
         this.container.append(
-          this.episodeRender.createEpisodeElement(selectedEpisode)
+          this.episodeRender.createEpisodeElement(selectedEpisode),
         );
         this.dom.resetCount();
       }
@@ -177,8 +178,7 @@ export default class Episode {
     }
 
     const text =
-      lg > 0 ? dom.setPlurial(lg, "episode") : `No result found`;
-      this.dom.setCount(text);
-    
+      lg > 0 ? this.dom.setPlurial(lg, "episode") : `No result found`;
+    this.dom.setCount(text);
   }
 }

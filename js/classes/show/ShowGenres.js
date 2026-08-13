@@ -15,9 +15,8 @@ export default class ShowGenres{
         show.genres.forEach((genre) => allGenres.add(genre));
       }
     }
-    allGenres.forEach((genre) => {
-      const btn = this.createGenreButton(genre);
-      container.appendChild(btn);
+   [...allGenres].sort().forEach((genre) => {
+      container.appendChild(this.createGenreButton(genre));
     });
   }
   /**

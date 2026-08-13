@@ -18,8 +18,8 @@ export default class ShowSort{
      */
     startSort() {
       return [...this.allShowsRaw].sort((a, b) => {
-        const dateA = a.premiered ? Date.parse(a?.premiered) : 0;
-        const dateB = b.premiered ? Date.parse(b.premiered) : 0;
+        const dateA = a.premiered ? Date.parse(a?.premiered) : Infinity;
+        const dateB = b.premiered ? Date.parse(b.premiered) : Infinity;
         return dateA - dateB;
       });
     }
