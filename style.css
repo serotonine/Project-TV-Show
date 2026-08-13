@@ -3,6 +3,7 @@
   --color-body: oklch(12.095% 0.04151 357.042);
   --color-bg-body: oklch(12.095% 0.04151 357.042);
   --color-white: oklch(96.307% 0.00656 4.672 / 0.942);
+  --color-white-opacity-50: oklch(96.307% 0.00656 4.672 / 0.8);
   --color-white-body: oklch(97.015% 0.00011 271.152);
   --color-blue: oklch(56.946% 0.1641 250.823);
   --color-blue-dark: oklch(50.923% 0.07625 246.013);
@@ -371,7 +372,7 @@ img {
 
 .btn-genre {
   background-color: var(--color-blue);
-  color: var(--color-bg-body);
+  color: var(--color-white-opacity-50);
   text-transform: uppercase;
   height: 100%;
   cursor: pointer;
