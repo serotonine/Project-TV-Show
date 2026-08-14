@@ -124,11 +124,11 @@ img {
   position: relative;
 }
 
-@media(min-width:992px) {
+/* @media(min-width:992px) {
   #main-wrapper {
     gap: 2.5rem;
   }
-}
+} */
 
 .episode,
 .show {
@@ -214,8 +214,8 @@ img {
 
 .summary p {
   display: -webkit-box;
-  -webkit-line-clamp: 6;
-  line-clamp: 6;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -228,7 +228,7 @@ img {
 
 .show-rating,
 .show-start-end {
-  margin-top: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .show-rating>span {
@@ -286,7 +286,7 @@ img {
 
 .search-container {
   --gap: 0.5rem;
-  padding: 2rem 0 0;
+  padding: 1.5rem 0 0;
   display: flex;
   flex-wrap: wrap;
   gap: var(--gap);
@@ -358,7 +358,7 @@ img {
 .search-count {
   display: inline-block;
   font-size: 1rem;
-  margin: 2rem 0;
+  margin: 2rem 0 1.5rem;
   padding: 0.25rem;
   color: var(--color-white);
 }
