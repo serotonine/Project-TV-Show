@@ -277,7 +277,11 @@ img {
     min-width: 15ch;
   }
 }
-
+.show-genre{
+  padding: 0.25rem 0.3rem;
+  text-transform: uppercase;
+  font-size: 0.65em;
+}
 /* Form */
 
 .search-container {
